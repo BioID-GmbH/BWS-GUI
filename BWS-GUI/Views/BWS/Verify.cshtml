@@ -1,0 +1,305 @@
+﻿@model BWS_GUI.Models.BWSViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>BioID Web Service</title>
+    <link rel="stylesheet" type="text/css" href="~/gui.css">
+</head>
+<body>
+    <header>
+        <div id="guilogo">
+            <img src="@Url.Content("~/images/logo.png")" alt="Logo" width="120" />
+        </div>
+        <div id="guibuttons">
+            <ul class="guinav">
+                <li class="guicancel"><a href="@string.Format("{0}?error=user_abort&access_token={1}&state={2}", Model.ReturnUrl, Model.Token, Model.State)" title="Abort and navigate back to caller"></a></li>
+                <li class="guimirror"><button id="guimirror" title="Mirror the display of the captured images" style="display:none"></button></li>
+                <li class="guistart"><button id="guistart" title="Start the recording of images" style="display:none"></button></li>
+            </ul>
+        </div>
+        <div id="guititle">
+            <div class="guititle">BioID Web Service</div>
+            <div class="guisubtitle">Biometric verification</div>
+        </div>
+        <div id="guidemo">
+            BWS unified user interface
+        </div>
+    </header>
+
+    <main id="body">
+        <section id="guisplash">
+            <div id="guiprompt">
+                <p>This web page requires the HTML5 Media Capture and Streams API (getUserMedia(), as supported by the actual versions of Opera, Firefox and Chrome). You also have to grant access to your camera.</p>
+                <p>If the Media Capture API is not supported by your browser, a Silverlight module will be loaded to get access to your video capture device.</p>
+                <p id="guierror" class="guierror"></p>
+            </div>
+        </section>
+
+        <section id="guiapp" style="display:none">
+            <div id="guimessage" style="display:none"></div>
+            <canvas id="guicanvas"></canvas>
+            <div id="guisilverlight"></div>
+            <canvas id="guimotionbar"></canvas>
+            <div id="guiarrows" style="display:none">
+                <img class="toparrow" id="guiarrowup" src="~/images/up.png" width="128" height="128" alt="upward" title="look slightly upward..." style="display:none" />
+                <img class="leftarrow" id="guiarrowleft" src="~/images/left.png" width="128" height="128" alt="left" title="look a little bit to the left..." style="display:none" />
+                <img class="rightarrow" id="guiarrowright" src="~/images/right.png" width="128" height="128" alt="right" title="look a little bit to the right..." style="display:none" />
+                <img class="bottomarrow" id="guiarrowdown" src="~/images/down.png" width="128" height="128" alt="downward" title="look slightly downward..." style="display:none" />
+            </div>
+            <div id="guistatus">
+                <!-- up to max recordings (=2 for verification) status images -->
+                <div class="guiimage" id="guiimage1" style="display:none">
+                    <div id="guiwait1" class="guiwait"></div>
+                    <div id="guiupload1" class="guiupload" style="display:none">Uploading...</div>
+                    <img id="guiuploaded1" src="~/images/upload.gif" style="display:none" />
+                </div>
+                <div class="guiimage" id="guiimage2" style="display:none">
+                    <div id="guiwait2" class="guiwait"></div>
+                    <div id="guiupload2" class="guiupload" style="display:none">Uploading...</div>
+                    <img id="guiuploaded2" src="~/images/upload.gif" style="display:none" />
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="~/scripts/jquery-2.1.1.min.js"></script>
+    <script src="~/scripts/bws.capture.js"></script>
+    <script src="~/scripts/silverlight.js"></script>
+
+    <script type="text/javascript">
+        // localized messages
+        var guimessages = {
+            // init error messages
+            'capture-error': 'Video capture failed to start with error: {0}<br />The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face recognition is not possible!',
+            'nogetUserMedia': 'Your browser does not support the HTML5 Media Capture and Streams API. We are trying to load a Silverlight module to access the multimedia capture device.',
+            'SilverlightError': 'Unhandled error in Silverlight Application {0}',
+            // status on screen messages (arguments: uploading + uploaded, recordings)
+            'DisplayTag': '',
+            'Uploading': 'Uploading sample {0} of {1} ...',
+            'Uploaded': '', // 'Sample {2} of {1} has been uploaded.',
+            'NoFaceFound': 'Upload failed: no face found',
+            'MultipleFacesFound': 'Upload failed: multiple faces were found',
+            'NoMovement': 'No motion detected, please move your head',
+            'Verifying': 'Verifying ...',
+            'Training': 'Training ...',
+            'LiveDetectionFailed': 'Live detection failed - retrying...',
+            'ChallengeResponseFailed': 'Challenge-Response failed!<br />Please turn head toward arrows...',
+            'NotRecognized': 'You have not been recognized - retrying...'
+        };
+
+        // localization and string formatting (additional arguments replace {0}, {1}, etc. in guimessages[key])
+        function formatText(key) {
+            var formatted = key;
+            if (guimessages[key] !== undefined) {
+                formatted = guimessages[key];
+            }
+            for (var i = 1; i < arguments.length; i++) {
+                formatted = formatted.replace("{" + (i - 1) + "}", arguments[i]);
+            }
+            return formatted;
+        }
+
+        var silverlightHost = null;
+        var capture = null;
+        var recordings = 2;
+        var executions = 3;
+        @if(Model.AutoEnroll) {
+        @: var maxHeight = 480;
+        } else {
+        @:var maxHeight = 320;
+        }
+        $(document).ready(function () {
+            // init BWS capture jQuery plugin (see bws.capture.js)
+            capture = bws.initcapture(document.getElementById('guicanvas'), document.getElementById('guimotionbar'), "@Model.Token", {
+                host: '@Model.Host',
+                task: "verification",
+                maxheight: maxHeight,
+                challengeResponse: @Model.ChallengeResponse.ToString().ToLower(),
+                recordings: recordings
+            });
+            // and start everything
+            onStart();
+        });
+
+        // Silverlight stuff - only used if HTML5 version fails
+        function CreateSLPlugin() {
+            console.log("start silverlight plugin");
+            $("#guiapp").show();
+            $("#guicanvas").hide();
+            $("#guisilverlight").show();
+            $("#guidemo").html("BWS unified user interface - Silverlight version");
+            Silverlight.createObjectEx({
+                source: '/ClientBin/BioID.Silverlight.Capture.xap',
+                parentElement: document.getElementById("guisilverlight"),
+                id: 'SilverlightCapture',
+                properties: {
+                    width: '100%',
+                    height: '100%',
+                    version: '5.0.61118.0',
+                    enableHtmlAccess: 'true',
+                    windowless: 'true'},
+                events: {
+                    onLoad: onSLPluginLoaded,
+                    onError: onSilverlightError},
+                context: null
+            });
+        }
+
+        function onSilverlightError(sender, args) {
+            var appSource = "";
+            if (sender != null && sender != 0) {
+                appSource = sender.getHost().Source;
+            }
+            var errMsg = "Unhandled Error in Silverlight Application " + appSource + "\n";
+            console.log(errMsg);
+            $("#guierror").html(formatText('SilverlightError', appSource));
+        }
+
+        function onSLPluginLoaded(plugIn, userContext, sender) {
+            console.log("silverlight plugin loaded");
+            $("#guisplash").hide();
+            silverlightHost = sender.getHost();
+        }
+
+        // only called from Silverlight plugin!
+        function upload(dataURL) {
+            capture.upload(dataURL);
+        }
+
+        // only called from Silverlight plugin!
+        function motionBar(motion) {
+            capture.drawMotionBar(motion);
+        }
+
+        // called by onStart or the Silverlight plugin to update GUI
+        function captureStarted() {
+            $("#guisplash").hide();
+            $("#guiapp").show();
+            $("#guimessage").show();
+            $("#guiarrows").show();
+            $("#guimirror").show().click(mirror);
+            $("#guistart").show().click(startRecording);
+        }
+
+        // called from Start button and onStart to initiate a new recording
+        function startRecording() {
+            $("#guistart").hide();
+            capture.startCountdown(function () {
+                for (var i = 1; i <= recordings; i++) {
+                    $("#guiuploaded" + i).hide();
+                    $("#guiupload" + i).hide();
+                    $("#guiwait" + i).show();
+                    $("#guiimage" + i).show();
+                }
+                capture.startRecording();
+                if(silverlightHost) {
+                    silverlightHost.Content.MainPage.StartCapturing();
+                }
+            });
+        }
+
+        // called from onStart when recording is done
+        function stopRecording() {
+            capture.stopRecording();
+            if(silverlightHost) {
+                silverlightHost.Content.MainPage.StopCapturing();
+            }
+            for (var i = 1; i <= recordings; i++) {
+                $("#guiimage" + i).hide();
+            }
+        }
+
+        // called from Mirror button to mirror the captured image
+        function mirror() {
+            if(silverlightHost) {
+                silverlightHost.Content.MainPage.MirrorDisplay();
+            } else {
+                capture.mirror();
+            }
+        }
+
+        // startup code
+        function onStart() {
+            capture.start(function () {
+                $("#guicanvas").show();
+                $("#guisilverlight").hide();
+                captureStarted();
+            }, function (error) {
+                if (error !== undefined) {
+                    // different browsers use different errors
+                    if (error.code === 1 || error.name === "PermissionDeniedError") {
+                        // in the spec we find code == 1 and name == PermissionDeniedError for the permission denied error
+                        $("#guierror").html(formatText('capture-error', 'Permission denied!'));
+                    } else {
+                        // otherwise try to print the error
+                        $("#guierror").html(formatText('capture-error', error));
+                    }
+                } else {
+                    // no error info typically says that browser doesn't support getUserMedia
+                    $("#guierror").html(formatText('nogetUserMedia'));
+                    // try to load silverlight plugin
+                    CreateSLPlugin();
+                }
+            }, function (error, retry) {
+                // done
+                stopRecording();
+                executions--;
+                if (error !== undefined && retry && executions > 0) {
+                    // if failed restart if retries are left, but wait a bit until the user has read the error message!
+                    setTimeout(function () { startRecording(); }, 1800);
+                } else {
+                    // done: redirect to caller ...
+                    var url = "@Model.ReturnUrl?access_token=@Model.Token";
+                    if (error !== undefined) {
+                        url = url + "&error=" + error;
+                    }
+                    url = url + "&state=@Model.State";
+                    window.location.replace(url);
+                }
+            }, function (status, message, dataURL) {
+                if(status === 'DisplayTag') {
+                    if(message.search("up")<0){$("#guiarrowup").hide();}else{$("#guiarrowup").show();}
+                    if(message.search("down")<0){$("#guiarrowdown").hide();}else{$("#guiarrowdown").show();}
+                    if(message.search("left")<0){$("#guiarrowleft").hide();}else{$("#guiarrowleft").show();}
+                    if(message.search("right")<0){$("#guiarrowright").hide();}else{$("#guiarrowright").show();}
+                } else {
+                    // report a message on the screen
+                    var uploaded = capture.getUploaded();
+                    var recording = uploaded + capture.getUploading();
+                    var msg = formatText(status, recording, recordings);
+                    var $msg = $("#guimessage");
+                    $msg.html(msg);
+                    $msg.stop(true).fadeIn(400).fadeOut(3000);
+
+                    // we display some animations/images dpending on the status
+                    if(status === 'Uploading') {
+                        // begin an upload
+                        $("#guiwait" + recording).hide();
+                        $("#guiupload" + recording).show();
+                    } else if(status === 'Uploaded') {
+                        // successfull upload (we should have a dataURL)
+                        if(dataURL) {
+                            $("#guiupload" + uploaded).hide();
+                            $image = $("#guiuploaded" + uploaded);
+                            $image.attr("src", dataURL);
+                            $image.attr("width", 90);
+                            $image.attr("height", 120);
+                            $image.show();
+                        }
+                    } else if (status === 'NoFaceFound' || status === 'MultipleFacesFound') {
+                        // upload failed
+                        recording++;
+                        $("#guiupload" + recording).hide();
+                        $("#guiwait" + recording).show();
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>

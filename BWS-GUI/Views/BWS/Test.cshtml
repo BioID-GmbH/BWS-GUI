@@ -1,0 +1,58 @@
+﻿@model BWS_GUI.Models.TestViewModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>BWS User Interface Test</title>
+    <link rel="stylesheet" type="text/css" href="~/gui.css">
+    <style>body{margin:0 15px;}</style>
+</head>
+<body>
+    <h1>BWS user interface test page</h1>
+    <p>To explicitely start the BWS user interface, just fill out the form below and start the enrollment or verification procedure.</p>
+    <p>
+        <b>Note</b>: To use the <a href="https://playground.bioid.com/BioIDCloudService/Extension" target="_blank">BWS Extension</a>
+        (and the user interface) you need to have an <i>Application-ID</i> and <i>-Secret</i> available.
+        If you do not have access to a BWS instance yet, you can request a
+        <a href="https://playground.bioid.com/BioIDCloudService/TrialInstanceRequisition">BWS trial instance here (requires login)</a>.
+        With your account you can then create and manage BWS applications and secrets in the
+        <a href="https://playground.bioid.com/Management/BWS" target="_blank">BWS Management portal (requires login)</a>.
+    </p>
+    @using (Html.BeginForm())
+    {
+        <table>
+            <tr>
+                <td>BWS Extension host:</td>
+                <td>@Html.TextBoxFor(model => model.Host, new { style = "width: 250px;", placeholder = "bws.bioid.com" })</td>
+            </tr>
+            <tr>
+                <td>Application-ID:</td>
+                <td>
+                    @Html.TextBoxFor(model => model.AppID, new { style = "width: 250px;", placeholder = "app-id" })
+                </td>
+            </tr>
+            <tr>
+                <td>Application-Secret:</td>
+                <td>
+                    @Html.PasswordFor(model => model.AppSecret, new { style = "width: 250px;", placeholder = "app-secret" })
+                </td>
+            </tr>
+            <tr>
+                <td><a href="https://playground.bioid.com/BioIDCloudService/API/BiometricClassID" target="_blank">Biometric Class ID</a>:</td>
+                <td>
+                    @Html.TextBoxFor(model => model.BCID, new { style = "width: 250px;", placeholder = "e.g. bws/42/12345" })
+                </td>
+            </tr>
+        </table>
+        <p>
+            @Html.EditorFor(model => model.ChallengeResponse) Enable Challenge Response<br />
+            @Html.EditorFor(model => model.AutoEnroll) Enable Auto-Enrollment (only for verification)
+        </p><p>
+            <input type="submit" formaction="@Url.Action("Enroll", "BWS")" value="Start Enrollment" />
+            <input type="submit" formaction="@Url.Action("Verify", "BWS")" value="Start Verification" />
+        </p>
+    }
+</body>
+</html>
