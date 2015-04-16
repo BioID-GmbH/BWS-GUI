@@ -7,6 +7,6 @@ The **BioID Web Service** (BWS) is a cloud-based online service providing a powe
 
 With this Visual Studio 2013 ASP.NET MVC project we provide some views, especially one for biometric verification and one for biometric enrollment together with a jQuery script and an optional Silverlight module. The jQuery script does most of the work regarding image capturing, motion detection and AJAX-communication to the BWS. The Silverlight module is only needed to capture images in case that the Browser does not support the HTML5 Media Capture API.
 
-To successfully run this sample web app, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://playground.bioid.com/BioIDCloudService/TrialInstanceRequisition).
+To successfully run this sample web app, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://playground.bioid.com/BioIDWebService/TrialInstanceRequisition).
 
-You can also try this BWS user interface via our [Playgound web site](https://playground.bioid.com/BioIDApps/UnifiedUserInterface).
+You can also try this BWS user interface via our [Playgound web site](https://playground.bioid.com/ExploreBiometrics).
