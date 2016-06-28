@@ -15,8 +15,8 @@ namespace mvc.Controllers
     public class HomeController : Controller
     {
         // TODO: fill in your BWS Application-ID and -secret:
-        const string _appID = "595520272.6.app.bioid.com";
-        const string _appSecret = "nGRoOZ5xKsdSWkiwa/c5klxE";
+        const string _appID = "your-BWS-appID";
+        const string _appSecret = "your-BWS-appSecret";
 
         public ActionResult Index()
         {
