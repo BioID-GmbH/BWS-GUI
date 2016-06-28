@@ -1,0 +1,43 @@
+{
+  "guiTitle": "BioID Web Service",
+  "guiSubTitleEnrollment": "Biometric enrollment",
+  "guiSubTitleVerification": "Biometric verification",
+  "guiHtml5Title": "BWS unified user interface (HTML5 version)",
+
+  "buttonCancel.title": "Abort and navigate back to caller",
+  "buttonMirror.title": "Mirror the display of the captured images",
+  "buttonStart.title": "Start the recording of images",
+  "buttonContinue.title": "Skip biometric process",
+  "buttonContinue": "Continue without biometrics",
+
+  "prompt": "This web page requires the HTML5 Media Capture and Streams API (getUserMedia(), as supported by the actual versions of Opera, Firefox, Chrome and Edge). You also have to grant access to your camera.",
+  "silverlightPrompt": "If the Media Capture API is not supported by your browser, a Silverlight module will be loaded to get access to your video capture device.",
+  "guimobileapp": "If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.",
+  "guimobileapp.title": "Start the BioID app",
+
+  "lookUp": "look slightly upward...",
+  "lookLeft": "look a little bit to the left...",
+  "lookRight": "look a little bit to the right...",
+  "lookDown": "look slightly downward...",
+
+  "uploadInfo": "Uploading...",
+
+  "capture-error": "Video capture failed to start with error: {0}<br />The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face recognition is not possible!",
+  "nogetUserMedia": "Your browser does not support the HTML5 Media Capture and Streams API. We are trying to load a Silverlight module to access the multimedia capture device. You might want to use the BioID mobile App instead.",
+  "silverlightError": "Unhandled Error in Silverlight Application occurred. {0}",
+  "idle": "Please press the Start button to start recording",
+  "Uploading": "Uploading sample {0} of {1} ...",
+  "Uploaded": "",
+  "NoFaceFound": "Upload failed: no face found",
+  "MultipleFacesFound": "Upload failed: multiple faces were found",
+  "NoMovement": "No motion detected, please move your head",
+  "Verifying": "Verifying ...",
+  "Training": "Training ...",
+  "LiveDetectionFailed": "Live detection failed - retrying...",
+  "ChallengeResponseFailed": "Challenge-Response failed!<br />Please turn head toward arrows...",
+  "NotRecognized": "You have not been recognized - retrying...",
+  "PermissionDenied": "Permission Denied!",
+  "3": "3 ...",
+  "2": "2 ...",
+  "1": "1 ..."
+}

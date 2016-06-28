@@ -1,0 +1,246 @@
+﻿body {
+    background-color: white;
+    color: #777;
+    font-family: "Segoe UI", Helvetica, Arial, Sans-Serif;
+    margin: 0;
+    padding: 0;
+}
+
+#guilogo {
+    position:fixed;
+    top:10px;
+    left:10px;
+    max-width:150px;
+    height:80px;
+}
+
+#guititle {
+    position:fixed;
+    top:2px;
+    left:180px;
+}
+
+@media screen and (max-width: 350px) {
+    #guilogo {
+        display: none;
+    }
+    #guititle {
+        left: 10px;
+    }
+}
+
+.guititle {
+    color: rgba(44, 100, 162, 1.0);
+    font-size: 1.75em;
+}
+
+.guisubtitle {
+    color: rgba(44, 100, 162, 0.8);
+    font-size: 1.2em;
+}
+
+#guibuttons {
+    position:fixed;
+    top:90px;
+    left:10px;
+    max-width:150px;
+    height:50px;
+}
+
+#guifeature {
+    position:fixed;
+    bottom:5px;
+    left:10px;
+    font-size: 0.8em;
+    font-style: italic;
+    color:#999;
+}
+
+#guistatus {
+    position:fixed;
+    bottom:0px;
+    right:0px;
+    color:#000;
+    text-align:right;
+}
+
+#guiprompt {
+    position:absolute;
+    top:150px;
+    left:15px;
+    width:90%;
+    font-size: 1.0em;
+}
+
+#guiapp {
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
+    z-index:-2;
+}
+
+#guimessage {
+    color: #2c64a2;
+    font-size: 2em;
+    position: absolute;
+    top: 150px;
+    left: 0px;
+    width: 100%;
+    text-align: center;
+    text-shadow: 1px 1px 0 #eee;
+    z-index: 1;
+}
+
+#guicanvas, #guisilverlight {
+    color: rgba(44, 100, 162, 0.2);
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
+    opacity:0.7;
+    z-index:-1;
+}
+
+#guimotionbar {
+    position:absolute;
+    left:1%;
+    bottom:4%;
+    width:2%;
+    height:60%;
+    z-index:2;
+}
+
+#guiarrows {
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
+    z-index:5;
+}
+
+.toparrow {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    width: 128px;
+    height: 128px;
+    margin-left: -64px;
+}
+
+.bottomarrow {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    width: 128px;
+    height: 128px;
+    margin-left: -64px;
+}
+
+.leftarrow {
+    position: fixed;
+    top: 50%;
+    left: 20px;
+    width: 128px;
+    height: 128px;
+    margin-top: -64px;
+}
+
+.rightarrow {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    width: 128px;
+    height: 128px;
+    margin-top: -64px;
+}
+
+.guiimage {
+    border: 1px solid rgba(44, 100, 162, 0.5);
+    float: right;
+    width:90px;
+    height:120px;
+    margin:4px;
+    opacity:0.4;
+}
+
+.guiwait {
+    width:100%;
+    height:100%;
+    background:url(../images/wait.gif) no-repeat center center;
+    text-align:center;
+}
+
+.guiupload {
+    width:100%;
+    height:100%;
+    background:url(../images/upload.gif) no-repeat center center;
+    text-align:center;
+}
+
+.guierror {
+    color: #FF5050;
+}
+
+#guibuttons ul.guinav {float: left; margin: 0; padding: 0;}
+#guibuttons ul.guinav li {display: inline; float: left; padding: 0; background: none; }
+#guibuttons ul.guinav li a, #guibuttons ul.guinav li button {
+    display: block; padding: 0; background: url(../images/guibuttons.png) top left no-repeat; height: 48px; width: 48px;
+}
+#guibuttons ul.guinav li.guicancel a {background-position: 0 0;}
+#guibuttons ul.guinav li.guicancel a:hover {background-position: 0 -48px;}
+#guibuttons ul.guinav li.guicancel a:active {background-position: 0 -96px;}
+#guibuttons ul.guinav li.guimirror button {background-position: -144px 0;}
+#guibuttons ul.guinav li.guimirror button:hover {background-position: -144px -48px;}
+#guibuttons ul.guinav li.guimirror button:active {background-position: -144px -96px;}
+#guibuttons ul.guinav li.guistart button {background-position: -48px 0;}
+#guibuttons ul.guinav li.guistart button:hover {background-position: -48px -48px;}
+#guibuttons ul.guinav li.guistart button:active {background-position: -48px -96px;}
+#guistartapp a {
+    float: right; margin: 4px; display: block; padding: 0; background: url(../images/guibuttons.png) top left no-repeat; height: 48px; width: 48px;
+}
+#guistartapp a {background-position: -192px 0;}
+#guistartapp a:hover {background-position: -192px -48px;}
+#guistartapp a:active {background-position: -192px -96px;}
+
+/* missuse the button to look like a link (used for JavaScript activation) */
+button {
+    background-color:transparent;
+    cursor: pointer;
+    border:0;
+    padding:0;
+    color:#000;
+}
+button:hover {
+    color: #2c64a2;
+}
+
+/* for the continue button */
+.btn {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+  background-image: -o-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  -webkit-border-radius: 9px;
+  -moz-border-radius: 9px;
+  border-radius: 9px;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 10px 20px 10px 20px;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  text-decoration: none;
+}

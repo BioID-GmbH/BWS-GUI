@@ -1,0 +1,68 @@
+﻿@model PerformTaskModel
+@{
+    ViewBag.Title = "BWS User Interface Test";
+}
+<div class="row">
+    <div class="col-sm-12">
+        <h1>BWS user interface test page</h1>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Result))
+        {
+            <p>
+                We received a callback from the BWS user interface that says:
+                @if (string.IsNullOrWhiteSpace(Model.Error))
+                { <strong>no error</strong> }
+                else
+                { <span class="error">@Model.Error</span> }
+            </p>
+            <p>A call to the <b>BWS result extension</b> returned:<br /><code class="wrapped">@Model.Result</code></p>
+            <hr />
+        }
+
+        <p>To explicitely start the BWS user interface, just fill out the form below and start the enrollment or verification procedure.</p>
+        <p>
+            <b>Note</b>: To use the <a href="https://playground.bioid.com/BioIDWebService/WebApi/" target="_blank">BWS Extension</a>
+            (and the user interface) you need to have an <i>Application-ID</i> and <i>-secret</i> available.
+            Please edit the <code>HomeController</code> server code and apply your Application-ID and -secret.<br />
+            If you do not have access to a BWS instance yet, you can request a
+            <a href="https://playground.bioid.com/BioIDWebService/TrialInstanceRequisition/">BWS trial instance here (requires login)</a>.
+            With your account you can then create and manage BWS applications and secrets in the
+            <a href="https://playground.bioid.com/Management/BWS/" target="_blank">BWS Management portal (requires login)</a>.
+        </p>
+
+        @using (Html.BeginForm("PerformTask", "Home", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            @Html.ValidationSummary(true)
+            <div class="form-group">
+                @Html.LabelFor(model => model.Host, new { @class = "control-label col-sm-3 col-lg-2" })
+                <div class="col-sm-4 col-lg-3">
+                    @Html.TextBoxFor(model => model.Host, new { @class = "form-control", placeholder = "e.g. bws.bioid.com" })
+                    @Html.ValidationMessageFor(model => model.Host)
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.BCID, new { @class = "control-label col-sm-3 col-lg-2" })
+                <div class="col-sm-4 col-lg-3">
+                    @Html.TextBoxFor(model => model.BCID, new { @class = "form-control", placeholder = "e.g. bioid.42.12345" })
+                    @Html.ValidationMessageFor(model => model.BCID)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9 col-lg-offset-2 col-lg-10">
+                    @Html.CheckBoxFor(model => model.ChallengeResponse) Enable challenge-response
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9 col-lg-offset-2 col-lg-10">
+                    @Html.CheckBoxFor(model => model.AutoEnroll) Enable auto-enrollment (only for verification)
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-3 col-sm-9 col-lg-offset-2 col-lg-10">
+                    <input type="submit" value="Start Enrollment" name="enroll" formaction="@Url.Action("Enroll")" class="btn btn-default" />
+                    <input type="submit" value="Start Verification" name="verify" formaction="@Url.Action("Verify")" class="btn btn-default" />
+                </div>
+            </div>
+        }
+    </div>
+</div>
