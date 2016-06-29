@@ -34,7 +34,7 @@
         <section id="guisplash">
             <div id="guiprompt">
                 <p data-res="prompt"></p>
-                <p data-res="silverlightPrompt"></p>
+                <p data-res="silverlightPrompt" id="silverlightPrompt" style="display:none"></p>
                 <p id="guierror" class="guierror"></p>        
                 <div id="guistartapp" style="display:none">
                     <p data-res="guimobileapp"></p>
@@ -87,6 +87,7 @@
 
     <script src="~/Content/uui/js/jquery-2.2.3.min.js"></script>
     <script src="~/Content/uui/js/bws.capture.js"></script>
+    @if (Model.SilverlightSupport) {
     <!-- 
         Silverlight stuff - only used if HTML5 version fails! 
         Note: 
@@ -97,7 +98,8 @@
     -->
     <script src="~/Content/uui/js/Silverlight.js"></script>
     <script src="~/Content/uui/js/bws.silverlight.js"></script>
- 
+    }
+
     <script type="text/javascript">
         // BEGIN OF CONFIGURATION
         var token = "@Model.Token";
@@ -175,6 +177,9 @@
 
         // initialize - load content in specific language and initialize bws capture
         function initialize() {
+            @if (Model.SilverlightSupport) {
+                @:$('#silverlightPrompt').show();
+            }
 
             // change gui subtitle if task is enrollment
             if (task === 'enrollment') {
@@ -321,22 +326,19 @@
                     }
                     // show button for continue (skip biometric task)
                     $('#guiskip').show();
+                    // for mobile browser we offer the possibility to start the mobile app version
+                    $('#guistartapp').show();
                 } else {
                     // no error info typically says that browser doesn't support getUserMedia
                     $('#guierror').html(formatText('nogetUserMedia'));
+                    // show button for continue (skip biometric task)
+                    $('#guiskip').show();
+                    // for mobile browser we offer the possibility to start the mobile app version
+                    $('#guistartapp').show();
                     // fallback if no getUserMedia available - try to load silverlight plugin
                     // Note: If you do not included the required silverlight js files nothing happens!
                     if (typeof silverlightHost !== 'undefined' && silverlightHost == null) {
                         createSilverlightPlugin('@Url.Content("~/Content/uui/clientBin/BioID.Silverlight.Capture.xap")');
-                    }
-                    else {
-                        console.log('To run Silverlight plugin you must include the required js files!')
-
-                        // show button for continue (skip biometric task)
-                        $('#guiskip').show();
-
-                        // for mobile browser we offer the possibility to start the mobile app version
-                        $('#guistartapp').show();
                     }
                 }
             }, function (error, retry) {

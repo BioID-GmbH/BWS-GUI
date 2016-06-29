@@ -93,7 +93,8 @@ namespace mvc.Controllers
                 ReturnUrl = new Uri(Request.Url, "Callback").ToString(),
                 State = "encrypted_app_status",
                 AutoEnroll = (taskFlags & TokenTask.AutoEnroll) == TokenTask.AutoEnroll,
-                AutoStart = false
+                AutoStart = false,
+                SilverlightSupport = !Request.Browser.IsMobileDevice
             });
         }
 

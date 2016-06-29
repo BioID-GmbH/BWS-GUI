@@ -32,6 +32,8 @@ function createSilverlightPlugin(source) {
 }
 function onSilverlightPluginLoaded(plugIn, userContext, sender) {
     console.log('silverlight plugin loaded');
+    $('#guiskip').hide();
+    $('#guistartapp').hide();
     $('#guisplash').hide();
     silverlightHost = sender.getHost();
 }

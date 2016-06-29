@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace mvc.Models
+﻿namespace mvc.Models
 {
     public class UUIViewModel
     {
@@ -15,5 +13,6 @@ namespace mvc.Models
         public string ChallengesJson { get; set; }
         public bool AutoEnroll { get; set; }
         public bool AutoStart { get; set; }
+        public bool SilverlightSupport { get; set; }
     }
 }
