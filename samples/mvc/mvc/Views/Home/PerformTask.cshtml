@@ -106,10 +106,10 @@
         var host = "@Model.Host";
         var task = "@Model.Task";
         var executions = @Model.MaxTries;
+        var recordings = @Model.Recordings;
         var autostart = @(Model.AutoStart ? "true" : "false");
         var challengeResponse = @(Model.ChallengeResponse ? "true" : "false");
         var challenges = @Html.Raw(Model.ChallengesJson);
-        var recordings = challengeResponse ? (challenges.length > 0 && challenges[0].length > 0 ? challenges[0].length + 1 : 4) : task === 'enrollment' ? 3 : 2;
         var maxHeight = task === 'enrollment' ? 480 : @(Model.AutoEnroll ? 480 : 320);
 
         // disable console log
@@ -228,8 +228,8 @@
                                 $(element).attr(attrKey, value);
                             }
                             // No dot notation in resource key, assign the resource value to the element's innerHTML.
-                            else if(key === resourceKey) { 
-                                $(element).html(value); 
+                            else if(key === resourceKey) {
+                                $(element).html(value);
                             }
                         }
                     }

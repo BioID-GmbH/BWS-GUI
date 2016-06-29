@@ -365,11 +365,11 @@
             var url;
             if (settings.task === 'enrollment') {
                 // go for enrollment
-                url = 'https://' + settings.host + '/extension/enroll?livedetection=true';
+                url = 'https://' + settings.host + '/extension/enroll';
                 if (statusCallback) { statusCallback('Training'); }
             } else {
                 // or for verification
-                url = 'https://' + settings.host + '/extension/verify?livedetection=true';
+                url = 'https://' + settings.host + '/extension/verify';
                 if (statusCallback) { statusCallback('Verifying'); }
             }
 

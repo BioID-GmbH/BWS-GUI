@@ -10,6 +10,7 @@ namespace mvc.Models
         public string ReturnUrl { get; set; }
         public string State { get; set; }
         public int MaxTries { get; set; }
+        public int Recordings { get; set; }
         public bool ChallengeResponse { get; set; }
         public string ChallengesJson { get; set; }
         public bool AutoEnroll { get; set; }
