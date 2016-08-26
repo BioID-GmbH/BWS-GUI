@@ -30,6 +30,7 @@
 
         // apply options to our default settings
         var settings = $.extend({}, defaults, options);
+        if (!settings.apiurl) { settings.apiurl = 'https://' + settings.host + '/extension/'; }
         // the issued token
         var token = issuedToken;
         // the canvas to draw the image and overlays
@@ -53,7 +54,7 @@
         // Possible Status values: Uploading, Uploaded, DisplayTag, NoFaceFound, MultipleFacesFound, NoMovement, Verifying, Training, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized
         var statusCallback; // arguments: status { message | tag } { dataURL }
         var doneCallback; // arguments: error
-        var uploaded = 0, uploading = 0, capturing = false;
+        var uploaded = 0, uploading = 0, captured = 0, capturing = false;
         var tag = 'any'; // any, up, down, left, right
         var tags = [];
 
@@ -204,7 +205,7 @@
             if (tag !== 'any' && capturing) {
                 // give user some time to react!
                 capturing = false;
-                setTimeout(function () { capturing = true; }, 800);
+                setTimeout(function () { capturing = true; }, 1000);
             }
         }
 
@@ -308,6 +309,7 @@
             startMotionTimer();
             // start upload procedure, but only if we still have to
             if (capturing && uploaded + uploading < settings.recordings) {
+                captured++;
                 uploading++;
                 if (statusCallback) { statusCallback('Uploading'); }
                 // create (gray-) png and upload ...
@@ -321,7 +323,7 @@
                 }
                 var jqxhr = $.ajax({
                     type: 'POST',
-                    url: 'https://' + settings.host + '/extension/upload?tag=' + tag,
+                    url: settings.apiurl + 'upload?tag=' + captured + ',' + tag,
                     data: dataURL,
                     // don't forget the authentication header
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -365,11 +367,11 @@
             var url;
             if (settings.task === 'enrollment') {
                 // go for enrollment
-                url = 'https://' + settings.host + '/extension/enroll';
+                url = settings.apiurl + 'enroll';
                 if (statusCallback) { statusCallback('Training'); }
             } else {
                 // or for verification
-                url = 'https://' + settings.host + '/extension/verify';
+                url = settings.apiurl + 'verify';
                 if (statusCallback) { statusCallback('Verifying'); }
             }
 
