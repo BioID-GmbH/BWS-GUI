@@ -1,5 +1,5 @@
-﻿/*! BioID Web Service - 2016-06-28
-*   image capture and recognition library - v1.0.6
+﻿/*! BioID Web Service - 2016-11-10
+*   image capture and recognition library - v1.0.8
 * https://www.bioid.com
 * Copyright (C) BioID GmbH.
 */
@@ -14,6 +14,7 @@
             task: 'verification', // | enrollment
             maxheight: 480,
             recordings: 2,
+            maxupload: 20,
             challengeResponse: false,
             motionareaheight: 160,
             threshold: 10,
@@ -47,8 +48,9 @@
 
         // we need to put some additional things into our closure
         var videoStream;
-        var processInterval;
+        var processInterval; 
         var noMotionTimer;
+        var noActivityTimer;
         var referenceImageData;
 
         // Possible Status values: Uploading, Uploaded, DisplayTag, NoFaceFound, MultipleFacesFound, NoMovement, Verifying, Training, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized
@@ -143,6 +145,15 @@
             }, 6000);
         }
 
+        // after a given time without activity from the user we abort the process
+        function startActivityTimer() {
+            clearInterval(noActivityTimer);
+            noActivityTimer = setInterval(function () {
+                stop();
+                doneCallback('Activity time is over!');
+            }, 20000);
+        }
+
         // generate a new challenge response tag or resets it to 'any'
         function setTag() {
             if (settings.challengeResponse) {
@@ -150,7 +161,7 @@
                 if (currentRecording > 0 && currentRecording < settings.recordings) {
                     if (tags.length >= currentRecording) {
                         // use the preset (typically via the BWS access token) tags!
-                        tag = tags[currentRecording - 1]
+                        tag = tags[currentRecording - 1];
                     }
                     else {
                         var newtag = tag;
@@ -263,6 +274,11 @@
                 // first frame has trigger true
                 motionResult = { trigger: true, motion: 0 };
 
+                if (captured > settings.maxupload) {
+                    stop();
+                    doneCallback('The maximum number of uploads has been reached!');
+                }
+
                 // scale current image into the motion canvas
                 var motionctx = motioncanvas.getContext('2d');
                 motionctx.drawImage(copycanvas, copycanvas.width / 4, copycanvas.height / 4, copycanvas.width / 2, copycanvas.height / 2, 0, 0, motioncanvas.width, motioncanvas.height);
@@ -323,7 +339,7 @@
                 }
                 var jqxhr = $.ajax({
                     type: 'POST',
-                    url: settings.apiurl + 'upload?tag=' + captured + ',' + tag,
+                    url: settings.apiurl + 'upload?tag=' + tag + '&index=' + captured + '&trait=FACE',
                     data: dataURL,
                     // don't forget the authentication header
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -551,6 +567,7 @@
         function recording(capture, challenges) {
             referenceImageData = null;
             clearInterval(noMotionTimer);
+            clearInterval(noActivityTimer);   
             uploaded = 0;
             uploading = 0;
             capturing = capture;
@@ -578,6 +595,7 @@
                     statusCallback('');
                 }
                 if (finishedCallback) finishedCallback();
+                startActivityTimer();
             }, 1200);
         };
 
