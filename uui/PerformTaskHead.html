@@ -88,7 +88,6 @@
         var token = getUrlParameter('access_token');
         var returnURL = getUrlParameter('return_url');
         var state = getUrlParameter('state');
-        var host = getUrlParameter('bws_host');
         var apiurl = getUrlParameter('apiurl');
         var task = getUrlParameter('task');
         var executions = 3;
@@ -203,7 +202,6 @@
                     localize();
                     // init BWS capture jQuery plugin (see bws.capture.js)
                     capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {
-                        host: host,
                         apiurl: apiurl,
                         task: task,
                         challengeResponse: challengeResponse,

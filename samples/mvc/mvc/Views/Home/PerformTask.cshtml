@@ -100,7 +100,6 @@
         var token = "@Model.Token";
         var returnURL = "@Model.ReturnUrl";
         var state = "@Model.State";
-        var host = "@Model.Host";
         var apiurl = "@Model.ApiUrl";
         var task = "@Model.Task";
         var executions = @Model.MaxTries;
@@ -206,8 +205,7 @@
                 }).always(function() {
                     localize();
                     // init BWS capture jQuery plugin (see bws.capture.js)
-                    capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {
-                        host: host,                  
+                    capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {                
                         apiurl: apiurl,
                         task: task,
                         challengeResponse: challengeResponse,
