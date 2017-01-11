@@ -6,15 +6,17 @@ namespace mvc.Models
     {
         [Required]
         [DataType(DataType.Url)]
-        [Display(Name = "BWS Extension host")]
-        public string Host { get; set; } = "bws.bioid.com";
+        [Display(Name = "Web API URL")]
+        public string ApiUrl { get; set; } = "https://bws.bioid.com/extension/";
         [Required]
         [Display(Name = "Biometric Class ID")]
         public string BCID { get; set; }
         [Required]
-        public bool ChallengeResponse { get; set; }
+        public bool ChallengeResponse { get; set; } = true;
         [Required]
         public bool AutoEnroll { get; set; }
+        public bool MotionBar { get; set; } = true;
+        public bool ShowHead { get; set; } = true;
         public string Result { get; set; }
         public string Error { get; set; }
     }

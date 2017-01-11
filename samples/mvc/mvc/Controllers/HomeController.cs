@@ -1,11 +1,11 @@
-﻿using mvc.Models;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using mvc.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace mvc.Controllers
 {
@@ -31,6 +31,16 @@ namespace mvc.Controllers
         }
 
         [HttpPost]
+        public async Task<ActionResult> Identify(PerformTaskModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(nameof(Index), model);
+            }
+            return await PerformTask(model, "identify");
+        }
+
+        [HttpPost]
         public async Task<ActionResult> Enroll(PerformTaskModel model)
         {
             if (!ModelState.IsValid)
@@ -47,7 +57,11 @@ namespace mvc.Controllers
             string credentials = Convert.ToBase64String(System.Text.Encoding.GetEncoding("iso-8859-1").GetBytes($"{_appID}:{_appSecret}"));
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
             string query = $"?id={_appID}&bcid={model.BCID}&task={task}&livedetection=true&challenge={model.ChallengeResponse}&autoenroll={model.AutoEnroll}";
-            UriBuilder uri = new UriBuilder("https", model.Host, 443, "extension/token", query);
+
+            if (!model.ApiUrl.EndsWith("/")) model.ApiUrl += "/";
+            UriBuilder u = new UriBuilder(model.ApiUrl);
+            UriBuilder uri = new UriBuilder(u.Scheme, u.Host, u.Port, u.Path + "token", query);
+
             HttpResponseMessage response = await httpClient.GetAsync(uri.Uri);
             if (!response.IsSuccessStatusCode)
             {
@@ -80,21 +94,25 @@ namespace mvc.Controllers
                 }
             }
 
+            var viewName = "PerformTask";
+            if (model.ShowHead) viewName = "PerformTaskHead";
+           
             // render the BWS unified user interface
-            return View("PerformTask", new UUIViewModel
+            return View(viewName, new UUIViewModel
             {
-                Task = (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? "enrollment" : "verification",
+                Task = (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? "enrollment" : (taskFlags & TokenTask.Identify) == TokenTask.Identify ? "identification" : "verification",
                 MaxTries = (int)(taskFlags & TokenTask.MaxTriesMask),
                 Recordings = recordings,
                 ChallengeResponse = (taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse,
                 ChallengesJson = challengesJson,
                 Token = token,
-                Host = model.Host,
+                ApiUrl = model.ApiUrl,
                 ReturnUrl = new Uri(Request.Url, "Callback").ToString(),
                 State = "encrypted_app_status",
                 AutoEnroll = (taskFlags & TokenTask.AutoEnroll) == TokenTask.AutoEnroll,
                 AutoStart = false,
-                SilverlightSupport = !Request.Browser.IsMobileDevice
+                SilverlightSupport = !Request.Browser.IsMobileDevice,
+                MotionBar = model.MotionBar
             });
         }
 
@@ -103,6 +121,7 @@ namespace mvc.Controllers
         public enum TokenTask
         {
             Verify = 0,
+            Identify = 0x10,
             Enroll = 0x20,
             MaxTriesMask = 0x0F,
             LiveDetection = 0x100,
@@ -124,7 +143,6 @@ namespace mvc.Controllers
             var claims = JObject.Parse(claimstring);
             model.BCID = (string)claims["bcid"];
             Uri host = new Uri((string)claims["aud"]);
-            model.Host = host.Host;
 
             if (!string.IsNullOrWhiteSpace(error))
             {
@@ -136,7 +154,7 @@ namespace mvc.Controllers
                 HttpClient httpClient = new HttpClient();
                 string credentials = Convert.ToBase64String(System.Text.Encoding.GetEncoding("iso-8859-1").GetBytes($"{_appID}:{_appSecret}"));
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-                UriBuilder uri = new UriBuilder("https", model.Host, 443, "extension/result", $"?access_token={access_token}");
+                UriBuilder uri = new UriBuilder("https", host.Host, 443, "extension/result", $"?access_token={access_token}");
                 HttpResponseMessage response = await httpClient.GetAsync(uri.Uri);
                 string content = await response.Content.ReadAsStringAsync();
                 model.Result = $"{response.StatusCode} ({(int)response.StatusCode}): {content}";

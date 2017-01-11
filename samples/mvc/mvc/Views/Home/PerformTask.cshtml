@@ -14,7 +14,7 @@
 <body>
     <header>
         <div id="guilogo">
-            <img src="~/Content/uui/images/logo.png" alt="BioID Logo" width="115" />
+            <img src="~/Content/uui/images/logo.svg" alt="BioID Logo" width="115" />
         </div>
         <div id="guibuttons">
             <ul class="guinav">
@@ -55,32 +55,27 @@
                 <img class="bottomarrow" id="guiarrowdown" src="~/Content/uui/images/down.png" width="128" height="128" alt="downward" title="look slightly downward..." style="display:none" data-res="lookDown" />
             </div>
             <div id="guistatus">
-                <!-- status images for up to 5 recordings -->
+                <!-- status images for up to 4 recordings -->
                 <div class="guiimage" id="guiimage1" style="display:none">
                     <div id="guiwait1" class="guiwait"></div>
                     <div id="guiupload1" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded1" src="~/Content/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded1" class="guiuploaded" src="~/Content/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage2" style="display:none">
                     <div id="guiwait2" class="guiwait"></div>
                     <div id="guiupload2" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded2" src="~/Content/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded2" class="guiuploaded" src="~/Content/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage3" style="display:none">
                     <div id="guiwait3" class="guiwait"></div>
                     <div id="guiupload3" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded3" src="~/Content/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded3" class="guiuploaded" src="~/Content/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage4" style="display:none">
                     <div id="guiwait4" class="guiwait"></div>
                     <div id="guiupload4" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded4" src="~/Content/uui/images/upload.gif" style="display:none" />
-                </div>
-                <div class="guiimage" id="guiimage5" style="display:none">
-                    <div id="guiwait5" class="guiwait"></div>
-                    <div id="guiupload5" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded5" src="~/Content/uui/images/upload.gif" style="display:none" />
-                </div>
+                    <img id="guiuploaded4" class="guiuploaded" src="~/Content/uui/images/upload.gif" style="display:none" />
+                </div> 
             </div>
         </section>
     </main>
@@ -106,12 +101,14 @@
         var returnURL = "@Model.ReturnUrl";
         var state = "@Model.State";
         var host = "@Model.Host";
+        var apiurl = "@Model.ApiUrl";
         var task = "@Model.Task";
         var executions = @Model.MaxTries;
         var recordings = @Model.Recordings;
         var autostart = @(Model.AutoStart ? "true" : "false");
         var challengeResponse = @(Model.ChallengeResponse ? "true" : "false");
         var challenges = @Html.Raw(Model.ChallengesJson);
+        var motionbar = @(Model.MotionBar ? "true" : "false");
         var maxHeight = task === 'enrollment' ? 480 : @(Model.AutoEnroll ? 480 : 320);
 
         // disable console log
@@ -124,7 +121,8 @@
             "guiTitle": "BioID Web Service",
             "guiSubTitleEnrollment": "Biometric enrollment",
             "guiSubTitleVerification": "Biometric verification",
-            "guiHtml5Title": "BWS unified user interface (HTML5 version)",
+            "guiSubTitleIdentification": "Biometric identification",
+            "guiHtml5Title": "BWS UUI (HTML5 version)",
             "buttonCancel.title": "Abort and navigate back to caller",
             "buttonMirror.title": "Mirror the display of the captured images",
             "buttonStart.title": "Start the recording of images",
@@ -149,9 +147,11 @@
             "MultipleFacesFound": "Upload failed: multiple faces were found",
             "NoMovement": "No motion detected, please move your head",
             "Verifying": "Verifying ...",
+            "Identifying":  "Identifying ...",
             "Training": "Training ...",
             "LiveDetectionFailed": "Live detection failed - retrying...",
-            "ChallengeResponseFailed": "Challenge-Response failed!<br />Please turn head toward arrows...",
+            "ChallengeResponseFailed": "Challenge-Response failed!",
+            "ChallengeArrows": "<br />Please turn head toward arrows...",
             "NotRecognized": "You have not been recognized - retrying...",
             "PermissionDenied": "Permission Denied!",
             "3": "3 ...",
@@ -185,7 +185,11 @@
             if (task === 'enrollment') {
                 $('#guisubtitle').attr('data-res', 'guiSubTitleEnrollment');
             }
-
+            // change gui subtilte if task is identification
+            if (task === 'identification') {
+                $('#guisubtitle').attr('data-res', 'guiSubTitleIdentification');
+            }
+            
             // try to get language info from the browser.
             var lang = window.navigator.userLanguage || window.navigator.language || "en";
             if (lang.length > 2) {
@@ -202,8 +206,9 @@
                 }).always(function() {
                     localize();
                     // init BWS capture jQuery plugin (see bws.capture.js)
-                    capture = bws.initcapture(document.getElementById('guicanvas'), null, token, {
-                        host: host,
+                    capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {
+                        host: host,                  
+                        apiurl: apiurl,
                         task: task,
                         challengeResponse: challengeResponse,
                         recordings: recordings,
@@ -278,7 +283,7 @@
                     $('#guiuploaded' + i).hide();
                     $('#guiupload' + i).hide();
                     $('#guiwait' + i).show();
-                    $('#guiimage' + i).show();
+                    $('#guiimage' + i).show();     
                 }
                 var tags = challengeResponse && challenges.length > currentExecution && challenges[currentExecution].length > 0 ? challenges[currentExecution] : [];
                 capture.startRecording(tags);
@@ -368,11 +373,14 @@
                     var uploaded = capture.getUploaded();
                     var recording = uploaded + capture.getUploading();
                     var msg = formatText(status, recording, recordings);
-                    var $msg = $('#guimessage');
+                    if (status === "ChallengeResponseFailed") {
+                        msg += formatText('ChallengeArrows'); 
+                    }
+                    var $msg = $('#guimessage'); 
                     $msg.html(msg);
                     $msg.stop(true).fadeIn(400).fadeOut(3000);
 
-                    // we display some animations/images dpending on the status
+                    // we display some animations/images depending on the status
                     if(status === 'Uploading') {
                         // begin an upload
                         $('#guiwait' + recording).hide();
@@ -383,8 +391,6 @@
                             $('#guiupload' + uploaded).hide();
                             $image = $('#guiuploaded' + uploaded);
                             $image.attr('src', dataURL);
-                            $image.attr('width', 90);
-                            $image.attr('height', 120);
                             $image.show();
                         }
                     } else if (status === 'NoFaceFound' || status === 'MultipleFacesFound') {

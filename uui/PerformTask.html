@@ -9,7 +9,7 @@
 <body>
     <header>
         <div id="guilogo">
-            <img src="/uui/images/logo.png" alt="BioID Logo" width="115" />
+            <img src="/uui/images/logo.svg" alt="BioID Logo" width="115" />
         </div>
         <div id="guibuttons">
             <ul class="guinav">
@@ -30,11 +30,11 @@
             <div id="guiprompt">
                 <p data-res="prompt"></p>
                 <p data-res="silverlightPrompt"></p>
-                <p id="guierror" class="guierror"></p>        
+                <p id="guierror" class="guierror"></p>
                 <div id="guistartapp" style="display:none">
                     <p data-res="guimobileapp"></p>
                     <p><span class="guimobileapp"><a id="guimobileapp" title="Start the BioID app"></a></span></p>
-                </div>          
+                </div>
                 <a href="" id="guiskip" class="btn" title="Skip biometric process" style="display:none" data-res="buttonContinue">Continue without biometrics</a>
             </div>
         </section>
@@ -50,31 +50,26 @@
                 <img class="bottomarrow" id="guiarrowdown" src="/uui/images/down.png" width="128" height="128" alt="downward" title="look slightly downward..." style="display:none" data-res="lookDown" />
             </div>
             <div id="guistatus">
-                <!-- status images for up to 5 recordings -->
+                <!-- status images for up to 4 recordings -->
                 <div class="guiimage" id="guiimage1" style="display:none">
                     <div id="guiwait1" class="guiwait"></div>
                     <div id="guiupload1" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded1" src="/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded1" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage2" style="display:none">
                     <div id="guiwait2" class="guiwait"></div>
                     <div id="guiupload2" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded2" src="/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded2" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage3" style="display:none">
                     <div id="guiwait3" class="guiwait"></div>
                     <div id="guiupload3" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded3" src="/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded3" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
                 </div>
                 <div class="guiimage" id="guiimage4" style="display:none">
                     <div id="guiwait4" class="guiwait"></div>
                     <div id="guiupload4" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded4" src="/uui/images/upload.gif" style="display:none" />
-                </div>
-                <div class="guiimage" id="guiimage5" style="display:none">
-                    <div id="guiwait5" class="guiwait"></div>
-                    <div id="guiupload5" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
-                    <img id="guiuploaded5" src="/uui/images/upload.gif" style="display:none" />
+                    <img id="guiuploaded4" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
                 </div>
             </div>
         </section>
@@ -97,8 +92,9 @@
         // BEGIN OF CONFIGURATION
         var token = getUrlParameter('access_token');
         var returnURL = getUrlParameter('return_url');
-        var state = getUrlParameter('state');
-        var host = getUrlParameter('bws_host');    
+        var state = getUrlParameter('state');    
+        var host = getUrlParameter('bws_host');
+		var apiurl = getUrlParameter('apiurl');
         var task = getUrlParameter('task');
         var executions = 3;
         var autostart = getUrlParameter('autostart') == 'true' ? true : false;
@@ -106,7 +102,9 @@
         var challengeResponse = getUrlParameter('challengeresponse') == 'true' ? true : false;
         var challenges = getUrlParameter('challenges');
         var recordings = challengeResponse ? (challenges.length > 0 && challenges[0].length > 0 ? challenges[0].length + 1 : 4) : task === 'enrollment' ? 3 : 2;
+        var motionbar = getUrlParameter('motionbar') == 'true' ? true : false;
         var maxHeight = task === 'enrollment' ? 480 : autoEnrollment ? 480 : 320;
+    
 
         // disable console log
         // console.log = function () { }
@@ -130,7 +128,8 @@
             "guiTitle": "BioID Web Service",
             "guiSubTitleEnrollment": "Biometric enrollment",
             "guiSubTitleVerification": "Biometric verification",
-            "guiHtml5Title": "BWS unified user interface (HTML5 version)",
+            "guiSubTitleIdentification": "Biometric identification",
+            "guiHtml5Title": "BWS UUI (HTML5 version)",
             "buttonCancel.title": "Abort and navigate back to caller",
             "buttonMirror.title": "Mirror the display of the captured images",
             "buttonStart.title": "Start the recording of images",
@@ -155,9 +154,11 @@
             "MultipleFacesFound": "Upload failed: multiple faces were found",
             "NoMovement": "No motion detected, please move your head",
             "Verifying": "Verifying ...",
+            "Identifying": "Identifying ...",
             "Training": "Training ...",
             "LiveDetectionFailed": "Live detection failed - retrying...",
-            "ChallengeResponseFailed": "Challenge-Response failed!<br />Please turn head toward arrows...",
+            "ChallengeResponseFailed": "Challenge-Response failed!",
+            "ChallengeArrows": "<br />Please turn head toward arrows...",
             "NotRecognized": "You have not been recognized - retrying...",
             "PermissionDenied": "Permission Denied!",
             "3": "3 ...",
@@ -205,8 +206,9 @@
                 }).always(function() {
                     localize();
                     // init BWS capture jQuery plugin (see bws.capture.js)
-                    capture = bws.initcapture(document.getElementById('guicanvas'), null, token, {
+                    capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {
                         host: host,
+                        apiurl: apiurl,
                         task: task,
                         challengeResponse: challengeResponse,
                         recordings: recordings,
@@ -329,6 +331,8 @@
                     }
                     // show button for continue (skip biometric task)
                     $('#guiskip').show();
+                    // for mobile browser we offer the possibility to start the mobile app version
+                    $('#guistartapp').show();
                 } else {
                     // no error info typically says that browser doesn't support getUserMedia
                     $('#guierror').html(formatText('nogetUserMedia'));
@@ -364,33 +368,34 @@
                     window.location.replace(url);
                 }
             }, function (status, message, dataURL) {
-                if(status === 'DisplayTag') {
-                    if(message.search('up')<0){$('#guiarrowup').hide();}else{$('#guiarrowup').show();}
-                    if(message.search('down')<0){$('#guiarrowdown').hide();}else{$('#guiarrowdown').show();}
-                    if(message.search('left')<0){$('#guiarrowleft').hide();}else{$('#guiarrowleft').show();}
-                    if(message.search('right')<0){$('#guiarrowright').hide();}else{$('#guiarrowright').show();}
+                if (status === 'DisplayTag') {
+                    if (message.search('up') < 0) { $('#guiarrowup').hide(); } else { $('#guiarrowup').show(); }
+                    if (message.search('down') < 0) { $('#guiarrowdown').hide(); } else { $('#guiarrowdown').show(); }
+                    if (message.search('left') < 0) { $('#guiarrowleft').hide(); } else { $('#guiarrowleft').show(); }
+                    if (message.search('right') < 0) { $('#guiarrowright').hide(); } else { $('#guiarrowright').show(); }
                 } else {
                     // report a message on the screen
                     var uploaded = capture.getUploaded();
                     var recording = uploaded + capture.getUploading();
                     var msg = formatText(status, recording, recordings);
+                    if (status === "ChallengeResponseFailed") {
+                        msg += formatText('ChallengeArrows');
+                    }
                     var $msg = $('#guimessage');
                     $msg.html(msg);
                     $msg.stop(true).fadeIn(400).fadeOut(3000);
 
-                    // we display some animations/images dpending on the status
-                    if(status === 'Uploading') {
+                    // we display some animations/images depending on the status
+                    if (status === 'Uploading') {
                         // begin an upload
                         $('#guiwait' + recording).hide();
                         $('#guiupload' + recording).show();
-                    } else if(status === 'Uploaded') {
+                    } else if (status === 'Uploaded') {
                         // successfull upload (we should have a dataURL)
-                        if(dataURL) {
+                        if (dataURL) {
                             $('#guiupload' + uploaded).hide();
                             $image = $('#guiuploaded' + uploaded);
                             $image.attr('src', dataURL);
-                            $image.attr('width', 90);
-                            $image.attr('height', 120);
                             $image.show();
                         }
                     } else if (status === 'NoFaceFound' || status === 'MultipleFacesFound') {

@@ -17,7 +17,7 @@
     <AssemblyName>mvc</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>44309</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -101,8 +101,11 @@
     <Content Include="Content\uui\css\gui.css" />
     <Content Include="Content\uui\images\down.png" />
     <Content Include="Content\uui\images\guibuttons.png" />
+    <Content Include="Content\uui\images\heads.svg" />
+    <Content Include="Content\uui\images\heads.svgz" />
     <Content Include="Content\uui\images\left.png" />
-    <Content Include="Content\uui\images\logo.png" />
+    <Content Include="Content\uui\images\logo.svg" />
+    <Content Include="Content\uui\images\logo.svgz" />
     <Content Include="Content\uui\images\right.png" />
     <Content Include="Content\uui\images\up.png" />
     <Content Include="Content\uui\images\upload.gif" />
@@ -121,7 +124,9 @@
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\Home\PerformTask.cshtml" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +150,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.ttf" />
     <Content Include="fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Scripts\jquery-1.10.2.min.map" />
+    <Content Include="Views\Home\PerformTaskHead.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

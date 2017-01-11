@@ -1,5 +1,5 @@
-﻿/*! BioID Web Service - 2016-11-10
-*   image capture and recognition library - v1.0.8
+﻿/*! BioID Web Service - 2017-05-01
+*   image capture and recognition library - v1.1.0
 * https://www.bioid.com
 * Copyright (C) BioID GmbH.
 */
@@ -11,19 +11,18 @@
     bws.initcapture = function (canvasElement, motionBarCanvasElement, issuedToken, options) {
         var defaults = {
             host: 'bws.bioid.com',
-            task: 'verification', // | enrollment
+            task: 'verification', // | identification | enrollment
+            trait: 'FACE',
             maxheight: 480,
             recordings: 2,
             maxupload: 20,
             challengeResponse: false,
             motionareaheight: 160,
-            threshold: 10,
-            noiseIntensityLevel: 36,
+            threshold: 20,
             mirror: true,
             color: false,
             display: 'circle',
             // motion drawing (if motionBarCanvasElement != undefined)
-            thresholdScale: 5,
             motionBackground: 'rgba(100, 150, 200, 0.1)',
             motionColor: 'rgba(100, 200, 0, 0.4)',
             motionThresholdColor: '#aa0000'
@@ -51,9 +50,17 @@
         var processInterval; 
         var noMotionTimer;
         var noActivityTimer;
-        var referenceImageData;
 
-        // Possible Status values: Uploading, Uploaded, DisplayTag, NoFaceFound, MultipleFacesFound, NoMovement, Verifying, Training, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized
+        // template for motion detection
+        var templateImage;
+        var templateWidth;
+        var templateHeight;
+        var templateXpos;
+        var templateYpos;
+        var centerX;
+        var centerY;
+
+        // possible status values: Uploading, Uploaded, DisplayTag, NoFaceFound, MultipleFacesFound, NoMovement, Verifying, Training, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized
         var statusCallback; // arguments: status { message | tag } { dataURL }
         var doneCallback; // arguments: error
         var uploaded = 0, uploading = 0, captured = 0, capturing = false;
@@ -141,7 +148,9 @@
         function startMotionTimer() {
             clearInterval(noMotionTimer);
             noMotionTimer = setInterval(function () {
-                if (statusCallback) { statusCallback('NoMovement'); }
+                if (uploading + uploaded < settings.recordings) {
+                    if (statusCallback) { statusCallback('NoMovement'); }
+                }
             }, 6000);
         }
 
@@ -149,8 +158,13 @@
         function startActivityTimer() {
             clearInterval(noActivityTimer);
             noActivityTimer = setInterval(function () {
-                stop();
-                doneCallback('Activity time is over!');
+                if (uploading === 0) {
+                    stop();
+                    doneCallback('Activity time is over!');
+                }
+                else {
+                    startActivityTimer();
+                }
             }, 20000);
         }
 
@@ -255,7 +269,7 @@
             }
 
             draw.drawImage(copycanvas, 0, 0, copycanvas.width, copycanvas.height, x, y, w, h);
-
+           
             if (settings.display === 'circle') {          
                 // now we 'fade-out' the edges of the image so that the user concentrates on the center
                 var gradient = draw.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, w * 0.5);
@@ -266,7 +280,7 @@
                 draw.fillStyle = gradient;
                 draw.fillRect(0, 0, canvas.width, canvas.height);
             }
-
+       
             if (capturing && uploaded < settings.recordings) {
                 // we may need to switch on the tags again ??????
                 //if (settings.challengeResponse && tag === 'any') { setTag(); }
@@ -281,12 +295,12 @@
 
                 // scale current image into the motion canvas
                 var motionctx = motioncanvas.getContext('2d');
-                motionctx.drawImage(copycanvas, copycanvas.width / 4, copycanvas.height / 4, copycanvas.width / 2, copycanvas.height / 2, 0, 0, motioncanvas.width, motioncanvas.height);
+                motionctx.drawImage(copycanvas, copycanvas.width / 8, copycanvas.height / 8, copycanvas.width - copycanvas.width / 4, copycanvas.height - copycanvas.height / 4, 0, 0, motioncanvas.width, motioncanvas.height);
                 var currentImageData = motionctx.getImageData(0, 0, motioncanvas.width, motioncanvas.height);
-
-                if (referenceImageData) {
+              
+                if (templateImage) {
                     // calculate motion ...
-                    motionResult = motionDetection(referenceImageData, currentImageData);
+                    motionResult = motionDetection(currentImageData);
                     // draw motion bar
                     drawMotionBar(motionResult.motion);
                 }
@@ -294,8 +308,8 @@
                     if (uploaded + uploading < settings.recordings) {
                         // in case we are not already bussy with some uploads start upload procedure
                         upload();
-                        // set the current image as the new reference frame
-                        referenceImageData = currentImageData;
+                        // current image is the new reference frame - create template
+                        createTemplate(currentImageData);
                     }
                 }
             }
@@ -307,9 +321,9 @@
                 motionbarcanvas.width = motionbarcanvas.clientWidth;
                 motionbarcanvas.height = motionbarcanvas.clientHeight;
                 $(motionbarcanvas).show();
-                motion = motion * settings.thresholdScale > 100 ? 100 : motion * settings.thresholdScale;
+                motion = motion;
                 var motionValue = motionbarcanvas.height * (1 - motion / 100.0);
-                var threshold = motionbarcanvas.height * (1 - settings.threshold * settings.thresholdScale / 100.0);
+                var threshold = motionbarcanvas.height * (1 - settings.threshold / 100.0);
                 var draw = motionbarcanvas.getContext('2d');
                 draw.fillStyle = settings.motionBackground;
                 draw.fillRect(0, 0, motionbarcanvas.width, motionbarcanvas.height);
@@ -339,7 +353,7 @@
                 }
                 var jqxhr = $.ajax({
                     type: 'POST',
-                    url: settings.apiurl + 'upload?tag=' + tag + '&index=' + captured + '&trait=FACE',
+                    url: settings.apiurl + 'upload?tag=' + tag + '&index=' + captured + '&trait=' + settings.trait,
                     data: dataURL,
                     // don't forget the authentication header
                     headers: { 'Authorization': 'Bearer ' + token }
@@ -385,7 +399,12 @@
                 // go for enrollment
                 url = settings.apiurl + 'enroll';
                 if (statusCallback) { statusCallback('Training'); }
-            } else {
+            } else if (settings.task === 'identification') {
+                // go for identification
+                url = settings.apiurl + 'identify';
+                if (statusCallback) { statusCallback('Identifying'); }
+            }
+            else {
                 // or for verification
                 url = settings.apiurl + 'verify';
                 if (statusCallback) { statusCallback('Verifying'); }
@@ -420,137 +439,105 @@
             });
         }
 
-        // motion detection by simply calculating the difference of two images
-        function motionDetection(first, current) {
+        // template for cross-correlation
+        function createTemplate(first) {
+            console.log("createTemplate");
+
+            centerX = first.width / 2;
+            centerY = first.height / 2;
+
+            templateImage = null;
+            templateWidth = first.width / 4;
+            templateHeight = first.height / 4 + first.height / 8;
+            templateXpos = centerX - templateWidth / 2;
+            templateYpos = centerY - templateHeight / 2;
+
+            // cut out the template
+            // we use a small width, quarter-size image around the center as template
+            templateImage = new Uint8ClampedArray(templateWidth * templateHeight);           
+              
+            var counter = 0;
+            var p = first.data;
+            for (var y = templateYpos; y < templateYpos + templateHeight; y++) {
+                // we use only the green plane here 
+                var bufferIndex = (y * first.width * 4) + templateXpos * 4 + 1;
+                for (var x = templateXpos; x < templateXpos + templateWidth; x++) {
+                    var templatepixel = p[bufferIndex];
+                    templateImage[counter++] = templatepixel;
+                    // we use only the green plane here 
+                    bufferIndex += 4;
+                }
+            }         
+        }
+
+        // motion detection by a normalized cross-correlation
+        function motionDetection(current) {
             motionResult = { trigger: false, motion: 0 };
 
-            var p1 = first.data, p2 = current.data, difference;
-            if (p1.length !== p2.length) {
-                return motionResult;
-            }
+            // this is the major computing step: Perform a normalized cross-correlation between the template of the first image and each incoming image
+            // this algorithm is basically called "Template Matching" - we use the normalized cross correlation to be independent of lighting changes
+            // we calculate the correlation of template and image over the whole image area
+            var bestHitX = 0;
+            var bestHitY = 0;
+            var maxCorr = 0;
+            var searchWidth = current.width / 4;
+            var searchHeight = current.height / 4;
+            var p = current.data;
 
-            // Calculate simple difference of the two images - concentrating on the centre
-            var differenceSum = 0;
+            for (y = centerY - searchHeight; y <= centerY + searchHeight - templateHeight; y++) {
+                for (x = centerX - searchWidth; x <= centerX + searchWidth - templateWidth; x++) {
+                    var nominator = 0;
+                    var denominator = 0;
+                    var templateIndex = 0;
 
-            // Moving objects in the background often disturb automatic motion detection, so we will concentrate on the middle of the images
-            // We will cut out the inner half difference image, i.e. we want to get rid of 1/4th margin on all sides
-            var differenceImageWidth = first.width / 2;
-            var differenceImageHeight = first.height / 2;
-
-            var differenceImage = new Uint8ClampedArray(differenceImageWidth * differenceImageHeight);
-
-            var numberOfPixels = 0;
-
-            // We leave 1/4 margin to top and bottom
-            var verticalStart = first.height / 4;
-            var verticalEnd = 3 * first.height / 4;
-            // And 1/4 margin to left and right
-            var horizontalStart = first.width / 4;
-            var horizontalEnd = 3 * first.width / 4;
-
-            for (var y = verticalStart; y < verticalEnd; y++) {
-                // we use only the green plane here +1
-                var positionCounter = (y * first.width * 4) + horizontalStart * 4 + 1;
-
-                for (var x = horizontalStart; x < horizontalEnd; x++) {
-                    // Use the absolute difference of source and target pixel intensity as a motion measurement
-                    difference = Math.abs(p1[positionCounter] - p2[positionCounter]);
-                    differenceSum += difference;
-                    differenceImage[numberOfPixels++] = difference;
-
-                    // we use only the green plane here
-                    positionCounter += 4;
-                }
-            }
-
-            // Mean difference: Divide by ROI
-            var meanDiff = differenceSum / (numberOfPixels + 0.5);
-
-            // Mean Difference: Never lower than noise level
-            meanDiff = (meanDiff < settings.noiseIntensityLevel) ? settings.noiseIntensityLevel : meanDiff;
-
-            // We want to roughly calculate the bounding moving box
-            var movingAreaX1 = 0;
-            var movingAreaX2 = 0;
-            var movingAreaY1 = 0;
-            var movingAreaY2 = 0;
-
-            // This will count all pixels that changed within the moving area
-            var changedPixels = 0;
-
-            // This is the main loop to determine a human's head bounding box
-            // Basically, we start from top to bottom,
-            // then try to find the horizontal coordinates of the head width,
-            // and stop before the shoulder area would enlarge that box again
-            var posCount = 0;  
-            for ( y = 1; y < differenceImageHeight; y++) {
-                for (x = 0; x < differenceImageWidth; x++) {
-                    difference = differenceImage[posCount++];
-
-                    // For moving area detection, we only count differences higher than normal noise
-                    if (difference > meanDiff) {
-                        // The first movement pixel will determine the starting coordinates
-                        if (movingAreaY1 === 0) {
-                            // This is typically the top head position
-                            movingAreaX1 = x;
-                            movingAreaY1 = y;
-                            movingAreaX2 = x;
-                            movingAreaY2 = y;
+                    // Calculate the normalized cross-correlation coefficient for this position
+                    for (var ty = 0; ty < templateHeight; ty++) {
+                        // we use only the green plane here 
+                        var bufferIndex = x * 4 + 1 + (y + ty) * current.width * 4;
+                        for (var tx = 0; tx < templateWidth; tx++) {
+                            var imagepixel = p[bufferIndex];
+                            nominator += templateImage[templateIndex++] * imagepixel;
+                            denominator += imagepixel * imagepixel;
+                            // we use only the green plane here 
+                            bufferIndex += 4;
                         }
+                    }
 
-                        // We do not want to get into the shoulder area
-                        if (y < 3 * differenceImageHeight / 5) {
-                            if (x < movingAreaX1) {
-                                // New left coordinate of bounding box
-                                movingAreaX1 = x;
-                            }
-                            else if (x > movingAreaX2) {
-                                // New right coordinate of bounding box
-                                movingAreaX2 = x;
-                            }
-                        }
-
-                        // We assume here that the vertical height of a human head is not exceeding 1.33 times the head width
-                        if ((y >= movingAreaY2) && (y - movingAreaY1 < 4 * (movingAreaX2 - movingAreaX1) / 3)) {
-                            // Only if the condition above is true we will use this lower vertical coordinate
-                            // This avoids expaning the bounding box to the bottom of the screen
-                            movingAreaY2 = y;
-
-                            // If the current location is within this calculated area, then we have a new movement within the head area
-                            if ((x >= movingAreaX1) && (x <= movingAreaX2)) {
-                                changedPixels++;
-                            }
-                        }
+                    // The NCC coefficient is then (watch out for division-by-zero errors for pure black images):
+                    var ncc = 0.0;
+                    if (denominator > 0) {
+                        ncc = nominator * nominator / denominator;
+                    }
+                    // Is it higher than what we had before?
+                    if (ncc > maxCorr) {
+                        maxCorr = ncc;
+                        bestHitX = x;
+                        bestHitY = y;
                     }
                 }
             }
 
-            // Calculate area of moving object
-            var movingAreaWidth = movingAreaX2 - movingAreaX1 + 1;
-            var movingAreaHeight = movingAreaY2 - movingAreaY1 + 1;
+            // now the most similar position of the template is (bestHitX, bestHitY). Calculate the difference from the origin:
+            var distX = bestHitX - templateXpos;
+            var distY = bestHitY - templateYpos;
+            var movementDiff = Math.sqrt(distX * distX + distY * distY);
+            // the maximum movement possible is a complete shift into one of the corners, i.e:
+            var maxDistX = searchWidth - templateWidth / 2;
+            var maxDistY = searchHeight - templateHeight / 2;
+            var maximumMovement = Math.sqrt(maxDistX * maxDistX + maxDistY * maxDistY);
 
-            // Was there any suitable movement at all?
-            if ((movingAreaWidth <= 0) || (movingAreaHeight <= 0)) {
-                movingAreaWidth = 1;
-                movingAreaHeight = 1;
-                changedPixels = 0;
+            // the percentage of the detected movement is therefore:
+            var movementPercentage = movementDiff / maximumMovement * 100;
+            if (movementPercentage > 100) {
+                movementPercentage = 100;
+            }
+            motionResult.motion = movementPercentage;
+
+            // trigger if movementPercentage is above threshold (default: when 20% of maximum movement is exceeded)
+            if (movementPercentage > settings.threshold) {
+                motionResult.trigger = true;
             }
 
-            // Moving area difference: Calculate changes according to size
-            var movementDiff = changedPixels / (movingAreaWidth * movingAreaHeight);
-
-            // movementDiff now holds the percentage of moving pixels within the moving area. Let's bring that to [0.0; 100.0]
-            movementDiff *= 100.0;
-
-            // If moving area is big enough to be a human face, then let's trigger
-            // We accept only faces that are at least 1/20th of the image dimensions
-            if ((movingAreaWidth > first.width / 20) && (movingAreaHeight > first.height / 20)) {
-                // set motion otherwise the value is 0
-                motionResult.motion = movementDiff;
-
-                // Trigger if movementDiff is above threshold (default: when 10% of face bounding box pixels changed)
-                motionResult.trigger = movementDiff > settings.threshold;
-            }
             return motionResult;
         }
 
@@ -565,7 +552,7 @@
 
         // start or stop recording
         function recording(capture, challenges) {
-            referenceImageData = null;
+            templateImage = null;
             clearInterval(noMotionTimer);
             clearInterval(noActivityTimer);   
             uploaded = 0;
@@ -617,7 +604,7 @@
             mirror: mirror,
             getUploading: function () { return uploading; },
             getUploaded: function () { return uploaded; }
-        };
+        };   
     };
 
     // replacement of the HTMLCanvasElement.toDataURL method that creates 8bit gray PNGs

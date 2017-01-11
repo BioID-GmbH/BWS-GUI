@@ -1,0 +1,443 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>BWS Unified User Interface</title>
+    <link href="/uui/css/gui.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <header>
+        <div id="guilogo">
+            <img src="/uui/images/logo.svg" alt="BioID Logo" width="115" />
+        </div>
+        <div id="guibuttons">
+            <ul class="guinav">
+                <li class="guicancel"><a id="guicancel" href="" title="Abort and navigate back to caller" data-res="buttonCancel"></a></li>
+                <li class="guimirror"><button id="guimirror" title="Mirror the display of the captured images" style="display:none" data-res="buttonMirror"></button></li>
+                <li class="guistart"><button id="guistart" title="Start the recording of images" style="display:none" data-res="buttonStart"></button></li>
+            </ul>
+        </div>
+        <div id="guititle">
+            <div class="guititle" data-res="guiTitle"></div>
+            <div class="guisubtitle" id="guisubtitle" data-res="guiSubTitleVerification"></div>
+        </div>
+        <div id="guifeature" data-res="guiHtml5Title"></div>
+    </header>
+
+    <main id="body">
+        <section id="guisplash">
+            <div id="guiprompt">
+                <p data-res="prompt"></p>
+                <p data-res="silverlightPrompt"></p>
+                <p id="guierror" class="guierror"></p>
+                <div id="guistartapp" style="display:none">
+                    <p data-res="guimobileapp"></p>
+                    <p><span class="guimobileapp"><a id="guimobileapp" title="Start the BioID app"></a></span></p>
+                </div>
+                <a href="" id="guiskip" class="btn" title="Skip biometric process" style="display:none" data-res="buttonContinue">Continue without biometrics</a>
+            </div>
+        </section>
+        <section id="guiapp" style="display:none">
+            <div id="guimessage" style="display:none"></div>
+            <canvas id="guicanvas"></canvas>
+            <div id="guisilverlight"></div>
+            <div class="head" id="guihead"></div>
+            <canvas id="guimotionbar"></canvas>
+            <div id="guistatus">
+                <!-- status images for up to 4 recordings -->
+                <div class="guiimage" id="guiimage1" style="display:none">
+                    <div id="guiwait1" class="guiwait"></div>
+                    <div id="guiupload1" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
+                    <img id="guiuploaded1" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
+                </div>
+                <div class="guiimage" id="guiimage2" style="display:none">
+                    <div id="guiwait2" class="guiwait"></div>
+                    <div id="guiupload2" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
+                    <img id="guiuploaded2" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
+                </div>
+                <div class="guiimage" id="guiimage3" style="display:none">
+                    <div id="guiwait3" class="guiwait"></div>
+                    <div id="guiupload3" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
+                    <img id="guiuploaded3" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
+                </div>
+                <div class="guiimage" id="guiimage4" style="display:none">
+                    <div id="guiwait4" class="guiwait"></div>
+                    <div id="guiupload4" class="guiupload" style="display:none" data-res="uploadInfo">Uploading...</div>
+                    <img id="guiuploaded4" class="guiuploaded" src="/uui/images/upload.gif" style="display:none" />
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="/uui/js/jquery-2.2.3.min.js"></script>
+    <script src="/uui/js/bws.capture.js"></script>
+    <!-- 
+        Silverlight stuff - only used if HTML5 version fails! 
+        Note: 
+        Silverlight is no longer used or blocked by modern browser. 
+        This implementation is for browser generation like MS Internet Explorer or Apple Safari.
+        If you do not have to support this browser generation you can remove the two lines refering the silverlight javascript files.
+        The variable 'silverlightHost' is undefined in this case and related code can be removed!
+    -->
+    <script src="/uui/js/Silverlight.js"></script>
+    <script src="/uui/js/bws.silverlight.js"></script>
+ 
+    <script type="text/javascript">
+        // BEGIN OF CONFIGURATION
+        var token = getUrlParameter('access_token');
+        var returnURL = getUrlParameter('return_url');
+        var state = getUrlParameter('state');
+        var host = getUrlParameter('bws_host');
+        var apiurl = getUrlParameter('apiurl');
+        var task = getUrlParameter('task');
+        var executions = 3;
+        var autostart = getUrlParameter('autostart') == 'true' ? true : false;
+        var autoEnrollment = getUrlParameter('autoenrollment') == 'true' ? true : false;
+        var challengeResponse = getUrlParameter('challengeresponse') == 'true' ? true : false;
+        var challenges = getUrlParameter('challenges');
+        var recordings = challengeResponse ? (challenges.length > 0 && challenges[0].length > 0 ? challenges[0].length + 1 : 4) : task === 'enrollment' ? 3 : 2;
+        var motionbar = getUrlParameter('motionbar') == 'true' ? true : false;
+        var parentTag = 'any';
+        var maxHeight = task === 'enrollment' ? 480 : autoEnrollment ? 480 : 320;
+
+        // disable console log
+        // console.log = function () { }
+
+        // END OF CONFIGURATION
+
+        // helper to read the url parameter
+        function getUrlParameter(param) {
+            var pageUrl = window.location.search.substring(1);
+            var urlVariables = pageUrl.split('&');
+            for (var i = 0; i < urlVariables.length; i++) {
+                var parameterName = urlVariables[i].split('=');
+                if (parameterName[0] == param) {
+                    return parameterName[1];
+                }
+            }
+        }
+
+        // localized messages (english defaults, might get overloaded in initialize())
+        var localizedData = {
+            "guiTitle": "BioID Web Service",
+            "guiSubTitleEnrollment": "Biometric enrollment",
+            "guiSubTitleVerification": "Biometric verification",
+            "guiSubTitleIdentification": "Biometric identification",
+            "guiHtml5Title": "BWS UUI (HTML5 version)",
+            "buttonCancel.title": "Abort and navigate back to caller",
+            "buttonMirror.title": "Mirror the display of the captured images",
+            "buttonStart.title": "Start the recording of images",
+            "buttonContinue.title": "Skip biometric process",
+            "buttonContinue": "Continue without biometrics",
+            "prompt": "This web page requires the HTML5 Media Capture and Streams API (getUserMedia(), as supported by the actual versions of Opera, Firefox, Chrome and Edge). You also have to grant access to your camera.",
+            "silverlightPrompt": "If the Media Capture API is not supported by your browser, a Silverlight module will be loaded to get access to your video capture device.",
+            "guimobileapp": "If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.",
+            "guimobileapp.title": "Start the BioID app",
+            "uploadInfo": "Uploading...",
+            "capture-error": "Video capture failed to start with error: {0}<br />The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face recognition is not possible!",
+            "nogetUserMedia": "Your browser does not support the HTML5 Media Capture and Streams API. We are trying to load a Silverlight module to access the multimedia capture device. You might want to use the BioID mobile App instead.",
+            "silverlightError": "Unhandled Error in Silverlight Application occurred. {0}",
+            "idle": "Please press the Start button to start recording",
+            "Uploading": "Uploading sample {0} of {1} ...",
+            "Uploaded": "",
+            "NoFaceFound": "Upload failed: no face found",
+            "MultipleFacesFound": "Upload failed: multiple faces were found",
+            "NoMovement": "No motion detected, please move your head",
+            "Verifying": "Verifying ...",
+            "Identifying": "Identifying ...",
+            "Training": "Training ...",
+            "LiveDetectionFailed": "Live detection failed - retrying...",
+            "ChallengeResponseFailed": "Challenge-Response failed!",
+            "ChallengeHead": "<br />Follow the head...",
+            "NotRecognized": "You have not been recognized - retrying...",
+            "PermissionDenied": "Permission Denied!",
+            "3": "3 ...",
+            "2": "2 ...",
+            "1": "1 ..."
+        };
+        var capture = null;
+        var currentExecution = 0;
+
+        // jQuery - shortcut for $(document).ready()
+        // Document Object Model (DOM) is ready
+        $(function () {
+            initialize();
+
+            // set navigation for the buttons
+            $('#guicancel').attr('href', returnURL + '?error=user_abort&access_token=' + token + '&state=' + state);
+            $('#guiskip').attr('href', returnURL + '?error=user_skip&access_token=' + token + '&state=' + state);
+            $('#guimobileapp').attr('href', 'bioid-verify://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state);
+            $('#guimobileapp').click(function () {
+                $('#guimobileapp').hide();
+            });
+        });
+
+        // resize the head if the window is resizing
+        $(window).resize(function () {
+            resizeHead();
+        });
+
+        // initialize - load content in specific language and initialize bws capture
+        function initialize() {
+
+            // change gui subtitle if task is enrollment
+            if (task === 'enrollment') {
+                $('#guisubtitle').attr('data-res', 'guiSubTitleEnrollment');
+            }
+
+            // try to get language info from the browser.
+            var lang = window.navigator.userLanguage || window.navigator.language || "en";
+            if (lang.length > 2) {
+                // Convert e.g. 'en-US' to 'en'.
+                lang = lang.substring(0, 2);
+            }
+
+            var language = $.getJSON('/uui/lang/' + lang + '.json').
+                done(function (data) {
+                    console.log('Loaded the language-specific resource successfully');
+                    localizedData = data;
+                }).fail(function(jqxhr, textStatus, error ) {
+                    console.log('Loading of language-specific resource failed with: ' + textStatus + ', ' + error );
+                }).always(function() {
+                    localize();
+                    // init BWS capture jQuery plugin (see bws.capture.js)
+                    capture = bws.initcapture(document.getElementById('guicanvas'), motionbar == true ? document.getElementById('guimotionbar') : null, token, {
+                        host: host,
+                        apiurl: apiurl,
+                        task: task,
+                        challengeResponse: challengeResponse,
+                        recordings: recordings,
+                        maxheight: maxHeight,
+                        display: 'circle'
+                    });
+                    // and start everything
+                    onStart();
+                });
+        }
+
+        function resizeHead() {
+            if ($('#guicanvas').width() <= 620) {
+                if ($('#guicanvas').width() < $('#guicanvas').height()) { scale = $('#guicanvas').width() / 360; }
+                else { scale = $('#guicanvas').height() / 460; }
+            }
+            else { scale = $('#guicanvas').height() / 460; }
+            $('#guihead').css({ transform: "scale(" + scale + ")" });
+        }
+
+        // localization of displayed strings
+        function localize() {
+            // loops through all HTML elements that must be localized.
+            var resourceElements = $('[data-res]');
+            for (var i = 0; i < resourceElements.length; i++) {
+                var element = resourceElements[i];
+                var resourceKey = $(element).attr('data-res');
+                if (resourceKey) {
+                    // Get all the resources that start with the key.
+                    for (var key in localizedData) {
+                        if (key.indexOf(resourceKey) == 0) {
+                            var value = localizedData[key];
+                            // Dot notation in resource key - assign the resource value to the elements property
+                            if (key.indexOf('.') > -1) {
+                                var attrKey = key.substring(key.indexOf(".") + 1);
+                                $(element).attr(attrKey, value);
+                            }
+                            // No dot notation in resource key, assign the resource value to the element's innerHTML.
+                            else if(key === resourceKey) { 
+                                $(element).html(value); 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // localization and string formatting (additional arguments replace {0}, {1}, etc. in localizedData[key])
+        function formatText(key) {
+            var formatted = key;
+            if (localizedData[key] !== undefined) {
+                formatted = localizedData[key];
+            }
+            for (var i = 1; i < arguments.length; i++) {
+                formatted = formatted.replace('{' + (i - 1) + '}', arguments[i]);
+            }
+            return formatted;
+        }
+
+        // called by onStart or the Silverlight plugin to update GUI
+        function captureStarted() {
+            $('#guisplash').hide();
+            $('#guiapp').show();
+            $('#guimessage').show();
+            $('#guiarrows').show();
+            $('#guimirror').show().click(mirror);
+
+            if (autostart) {
+                setTimeout(function () { startRecording(); }, 1000);
+            }
+            else {
+                $('#guistart').show().click(startRecording);
+            }
+        }
+
+        // called from Start button and onStart to initiate a new recording
+        function startRecording() {
+            $('#guistart').hide();
+            capture.startCountdown(function () {
+                for (var i = 1; i <= recordings; i++) {
+                    $('#guiuploaded' + i).hide();
+                    $('#guiupload' + i).hide();
+                    $('#guiwait' + i).show();
+                    $('#guiimage' + i).show();
+                }
+                var tags = challengeResponse && challenges.length > currentExecution && challenges[currentExecution].length > 0 ? challenges[currentExecution] : [];
+                capture.startRecording(tags);
+                if (typeof silverlightHost !== 'undefined' && silverlightHost !== null) {
+                    silverlightHost.Content.MainPage.StartCapturing();
+                }
+            });
+        }
+
+        // called from onStart when recording is done
+        function stopRecording() {
+            capture.stopRecording();
+            for (var i = 1; i <= recordings; i++) {
+                $('#guiimage' + i).hide();
+            }
+            if (typeof silverlightHost !== 'undefined' && silverlightHost !== null) {
+                silverlightHost.Content.MainPage.StopCapturing();
+            }
+        }
+
+        // called from Mirror button to mirror the captured image
+        function mirror() {
+            if (typeof silverlightHost !== 'undefined' && silverlightHost !== null) {
+                silverlightHost.Content.MainPage.MirrorDisplay();
+            } else {
+                capture.mirror();
+            }
+        }
+
+        // startup code
+        function onStart() {
+            capture.start(function () {
+                $('#guicanvas').show();
+                $('#guisilverlight').hide();
+                captureStarted();
+            }, function (error) {
+                if (error !== undefined) {
+                    // different browsers use different errors
+                    if (error.code === 1 || error.name === 'PermissionDeniedError') {
+                        // in the spec we find code == 1 and name == PermissionDeniedError for the permission denied error
+                        $('#guierror').html(formatText('capture-error', formatText('PermissionDenied')));
+                    } else {
+                        // otherwise try to print the error
+                        $('#guierror').html(formatText('capture-error', error));
+                    }
+                    // show button for continue (skip biometric task)
+                    $('#guiskip').show();
+                    // for mobile browser we offer the possibility to start the mobile app version
+                    $('#guistartapp').show();
+                } else {
+                    // no error info typically says that browser doesn't support getUserMedia
+                    $('#guierror').html(formatText('nogetUserMedia'));
+                    // fallback if no getUserMedia available - try to load silverlight plugin
+                    // Note: If you do not included the required silverlight js files nothing happens!
+                    if (typeof silverlightHost !== 'undefined' && silverlightHost == null) {
+                        createSilverlightPlugin('/uui/clientBin/BioID.Silverlight.Capture.xap');
+                    }
+                    else {
+                        console.log('To run Silverlight plugin you must include the required js files!')
+
+                        // show button for continue (skip biometric task)
+                        $('#guiskip').show();
+
+                        // for mobile browser we offer the possibility to start the mobile app version
+                        $('#guistartapp').show();
+                    }
+                }
+            }, function (error, retry) {
+                // done
+                stopRecording();
+                currentExecution++;
+                if (error !== undefined && retry && currentExecution < executions) {
+                    // if failed restart if retries are left, but wait a bit until the user has read the error message!
+                    setTimeout(function () { startRecording(); }, 1800);
+                } else {
+                    // done: redirect to caller ...
+                    var url = returnURL + '?access_token=' + token;
+                    if (error !== undefined) {
+                        url = url + '&error=' + error;
+                    }
+                    url = url + '&state=' + state;
+                    window.location.replace(url);
+                }
+            }, function (status, message, dataURL) {
+                // show guidhead direction animation
+                if(status === 'DisplayTag') {
+                    if (challengeResponse == true) {
+                        $('#guihead').removeClass();
+                        resizeHead();
+                        if (message == 'up') {
+                            if (parentTag == 'down') { $('#guihead').addClass('head movedownreverse'); }
+                            else { $('#guihead').addClass('head moveup'); }
+                        }
+                        if (message == 'down') {
+                            if (parentTag == 'up') { $('#guihead').addClass('head moveupreverse'); }
+                            else { $('#guihead').addClass('head movedown'); }
+                        }
+                        if (message == 'left') {
+                            if (parentTag == 'right') { $('#guihead').addClass('head moverightreverse'); }
+                            else { $('#guihead').addClass('head moveleft'); }
+                        }
+                        if (message == 'right') {
+                            if (parentTag == 'left') { $('#guihead').addClass('head moveleftreverse'); }
+                            else { $('#guihead').addClass('head moveright'); }
+                        }
+                        parentTag = message;
+                    }
+                } else {
+                    // report a message on the screen
+                    var uploaded = capture.getUploaded();
+                    var recording = uploaded + capture.getUploading();
+                    var msg = formatText(status, recording, recordings);
+                    if (status === "ChallengeResponseFailed") {
+                        msg += formatText('ChallengeHead');
+                    }
+                    var $msg = $('#guimessage');
+                    $msg.html(msg);
+                    $msg.stop(true).fadeIn(400).fadeOut(3000);
+
+                    // we display some animations/images depending on the status
+                    if (status === 'Uploading') {
+                        // show guihead animation infinite
+                        if (challengeResponse == false) {
+                            if (recording == 1) {
+                                resizeHead();
+                                if (Math.random() < 0.5) { $('#guihead').addClass('head movevertical'); }
+                                else { $('#guihead').addClass('head movehorizontal'); }
+                            }
+                        }
+                        // begin an upload
+                        $('#guiwait' + recording).hide();
+                        $('#guiupload' + recording).show();
+                    } else if (status === 'Uploaded') {
+                        // successfull upload (we should have a dataURL)
+                        if (dataURL) {
+                            $('#guiupload' + uploaded).hide();
+                            $image = $('#guiuploaded' + uploaded);
+                            $image.attr('src', dataURL);
+                            $image.show();
+                        }
+                    } else if (status === 'NoFaceFound' || status === 'MultipleFacesFound') {
+                        // upload failed
+                        recording++;
+                        $('#guiupload' + recording).hide();
+                        $('#guiwait' + recording).show();
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+</html>

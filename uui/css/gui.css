@@ -20,13 +20,73 @@
     left:180px;
 }
 
-@media screen and (max-width: 350px) {
-    #guilogo {
-        display: none;
+@media screen and (max-height: 550px) {
+    #guilogo { display: none; }
+    #guititle { left: 10px; }
+    #guimessage {font-size: 1.4em; }
+    .guiupload { font-size: 0.7em; }
+    .guiimage {
+        width: 45px;
+        height: 60px;
     }
-    #guititle {
-        left: 10px;
+    .guiuploaded {
+        width: 45px;
+        height: 60px;  
+     }
+}
+
+@media screen and (max-width: 400px) and (min-height: 551px) {
+    #guilogo { display: none; }
+    #guititle { left: 10px; }
+    #guimessage {font-size: 1.2em; }
+    .guiupload { font-size: 0.6em; }
+    .guiimage {   
+        width: 60px;
+        height: 80px;     
     }
+    .guiuploaded {
+        width: 60px;
+        height: 80px;   
+     }
+    .leftarrow { left: -64px;}
+    .rightarrow { right: -64px;}
+}
+
+@media screen and (min-width: 401px) and (max-width:450px) and (min-height: 551px)  {
+    #guititle {font-size: 0.9em; }
+    #guisubtitle {font-size: 1.0em; }
+    #guimessage {font-size: 1.5em; }
+    .guiupload { font-size: 0.7em; }
+    .guiimage {
+        width: 75px;
+        height: 100px;
+    }
+    .guiuploaded {
+        width: 75px;
+        height: 100px;  
+     }
+    .leftarrow { left: -64px;}
+    .rightarrow { right: -64px;}
+}
+   
+@media screen and (min-width: 451px) and (min-height: 551px) {
+    #guimessage { font-size: 2.0em; }
+    .guiupload { font-size: 1.2em; }
+    .guiimage {
+        width: 90px;
+        height: 120px;
+    }
+    .guiuploaded {
+        width: 90px;
+        height: 120px;
+    }
+    .leftarrow { left: -64px;}
+    .rightarrow { right: -64px;}
+}
+
+@media screen and (min-width: 720px) and (min-height: 551px) {
+    .leftarrow { left: 20px; }
+    .rightarrow { right: 20px; }
 }
 
 .guititle {
@@ -58,8 +118,8 @@
 
 #guistatus {
     position:fixed;
-    bottom:0px;
-    right:0px;
+    bottom:0;
+    right:0;
     color:#000;
     text-align:right;
 }
@@ -74,8 +134,8 @@
 
 #guiapp {
     position:absolute;
-    top:0px;
-    left:0px;
+    top:0;
+    left:0;
     width:100%;
     height:100%;
     z-index:-2;
@@ -83,10 +143,9 @@
 
 #guimessage {
     color: #2c64a2;
-    font-size: 2em;
     position: absolute;
     top: 150px;
-    left: 0px;
+    left: 0;
     width: 100%;
     text-align: center;
     text-shadow: 1px 1px 0 #eee;
@@ -96,8 +155,8 @@
 #guicanvas, #guisilverlight {
     color: rgba(44, 100, 162, 0.2);
     position:absolute;
-    top:0px;
-    left:0px;
+    top:0;
+    left:0;
     width:100%;
     height:100%;
     opacity:0.7;
@@ -115,8 +174,8 @@
 
 #guiarrows {
     position:absolute;
-    top:0px;
-    left:0px;
+    top:0;
+    left:0;
     width:100%;
     height:100%;
     z-index:5;
@@ -143,7 +202,6 @@
 .leftarrow {
     position: fixed;
     top: 50%;
-    left: 20px;
     width: 128px;
     height: 128px;
     margin-top: -64px;
@@ -152,7 +210,6 @@
 .rightarrow {
     position: fixed;
     top: 50%;
-    right: 20px;
     width: 128px;
     height: 128px;
     margin-top: -64px;
@@ -161,10 +218,9 @@
 .guiimage {
     border: 1px solid rgba(44, 100, 162, 0.5);
     float: right;
-    width:90px;
-    height:120px;
-    margin:4px;
-    opacity:0.4;
+    margin: 4px;
+    margin-bottom:25px;
+    opacity: 0.4;
 }
 
 .guiwait {
@@ -178,6 +234,10 @@
     width:100%;
     height:100%;
     background:url(../images/upload.gif) no-repeat center center;
+    text-align:center;
+}
+
+.guiuploaded {
     text-align:center;
 }
 
@@ -222,12 +282,7 @@ button:hover {
 .btn {
   background: #3498db;
   background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
-  background-image: -moz-linear-gradient(top, #3498db, #2980b9);
-  background-image: -ms-linear-gradient(top, #3498db, #2980b9);
-  background-image: -o-linear-gradient(top, #3498db, #2980b9);
   background-image: linear-gradient(to bottom, #3498db, #2980b9);
-  -webkit-border-radius: 9px;
-  -moz-border-radius: 9px;
   border-radius: 9px;
   color: #ffffff;
   font-size: 16px;
@@ -238,9 +293,137 @@ button:hover {
 .btn:hover {
   background: #3cb0fd;
   background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
   background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
   text-decoration: none;
 }
+
+.head { 
+  position: fixed; 
+  top: 50%;
+  left: 50%;
+  margin-top: -128px;
+  margin-left: -82px;
+  width: 165px;
+  height: 256px;
+  opacity: 0.4;
+  transform: scale(1);
+  -ms-transform: scale(1);  
+  -webkit-transform: scale(1); 
+  -moz-transform: scale(1);
+   background-image: url("../images/heads.svg");
+}
+
+@-webkit-keyframes move-left {
+   from { background-position: -2475px -3840px; }
+     to { background-position: 0 -3840px;}
+}
+
+@keyframes move-left {
+   from { background-position: -2475px -3840px; }
+     to { background-position: 0 -3840px;}
+}
+
+@-webkit-keyframes move-left-reverse {
+   from { background-position: 0 -3840px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@keyframes move-left-reverse {
+   from { background-position: 0 -3840px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@-webkit-keyframes move-right {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -4950px -3840px;}
+}
+
+@keyframes move-right {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -4950px -3840px;}
+}
+
+@-webkit-keyframes move-right-reverse {
+   from { background-position: -4950px -3840px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@keyframes move-right-reverse {
+   from { background-position: -4950px -3840px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@-webkit-keyframes move-up {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -2475px  0;}
+}
+
+@keyframes move-up {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -2475px  0;}
+}
+
+@-webkit-keyframes move-up-reverse {
+   from { background-position: -2475px  0;}
+     to { background-position: -2475px -3840px; }
+}
+
+@keyframes move-up-reverse {
+   from { background-position: -2475px  0;}
+     to { background-position: -2475px -3840px; }
+}
+
+@-webkit-keyframes move-down {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -2475px -7680px;}
+}
+
+@keyframes move-down {
+   from { background-position: -2475px -3840px; }
+     to { background-position: -2475px -7680px;}
+}
+
+@-webkit-keyframes move-down-reverse {
+   from { background-position: -2475px -7680px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@keyframes move-down-reverse {
+   from { background-position: -2475px -7680px;}
+     to { background-position: -2475px -3840px; }
+}
+
+@-webkit-keyframes move-vertical {
+   0%   { background-position: -2475px -1792px; }
+   50%  { background-position: -2475px -5888px; }
+   100% { background-position: -2475px -1792px; }
+}
+
+@keyframes move-vertical {
+   0%   { background-position: -2475px -1792px; }
+   50%  { background-position: -2475px -5888px; }
+   100% { background-position: -2475px -1792px; }
+}
+
+@-webkit-keyframes move-horizontal {
+   0%   { background-position: -1155px -3840px; }
+   50%  { background-position: -3795px -3840px; }
+   100% { background-position: -1155px -3840px; }
+}
+
+@keyframes move-horizontal {
+   0%   { background-position: -1155px -3840px; }
+   50%  { background-position: -3795px -3840px; }
+   100% { background-position: -1155px -3840px; }
+}
+
+.movevertical { -webkit-animation: move-vertical 2s steps(16) infinite; animation: move-vertical 2s steps(16) infinite; }
+.movehorizontal { -webkit-animation: move-horizontal 2s steps(16) infinite; animation: move-horizontal 2s steps(16) infinite; }
+.moveleft { -webkit-animation: move-left 1s steps(15) forwards; animation: move-left 1s steps(15) forwards; }
+.moveleftreverse { -webkit-animation: move-left-reverse 1s steps(15) forwards; animation: move-left-reverse 1s steps(15) forwards; }
+.moveright {  -webkit-animation: move-right 1s steps(15) forwards;  animation: move-right 1s steps(15) forwards; }
+.moverightreverse {  -webkit-animation: move-right-reverse 1s steps(15) forwards;  animation: move-right-reverse 1s steps(15) forwards; }
+.moveup { -webkit-animation: move-up 1s steps(15) forwards; animation: move-up 1s steps(15) forwards; }
+.moveupreverse { -webkit-animation: move-up-reverse 1s steps(15) forwards; animation: move-up-reverse 1s steps(15) forwards; }
+.movedown { -webkit-animation: move-down 1s steps(15) forwards; animation: move-down 1s steps(15) forwards; }
+.movedownreverse { -webkit-animation: move-down-reverse 1s steps(15) forwards; animation: move-down-reverse 1s steps(15) forwards; }
