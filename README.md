@@ -12,7 +12,7 @@ The **uui** folder contains everything you typically need to run a biometric tas
 
 Complete samples are provided in the **samples** folder, e.g. there is a Visual Studio ASP.NET MVC project in the `mvc` subfolder. 
 
-To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://playground.bioid.com/BioIDWebService/TrialInstanceRequisition).
+To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://bwsportal.bioid.com/register).
 
 You can also try this BWS user interface via our [Playgound website](https://playground.bioid.com/ExploreBiometrics).
 
