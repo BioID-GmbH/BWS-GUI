@@ -14,6 +14,6 @@ Complete samples are provided in the **samples** folder, e.g. there is a Visual 
 
 To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://bwsportal.bioid.com/register).
 
-You can also try this BWS user interface via our [Playgound website](https://playground.bioid.com/ExploreBiometrics).
+You can also try this BWS user interface via our [Playgound website](https://playground.bioid.com).
 
 You can find some more information about our [face recognition](https://www.bioid.com) technology.
