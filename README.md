@@ -1,19 +1,25 @@
 BWS-GUI
 =======
 
-BWS HTML5 Unified User Interface
-------------------------
+BWS HTML5 Unified User Interface (UUI)
+-------------------------------------
 
-The **BioID Web Service** (BWS) is a cloud-based online service providing a powerful multimodal biometric technology with liveness detection to application developers. But often developers have some trouble writing a user interface collecting the data required to perform the biometric tasks, notably face images. Therefore we want to provide some sample code that might be used as a user interface to the BWS, in this case for a web based application using HTML5 with jQuery.
+The **BioID Web Service** (BWS) is a cloud-based online service providing a powerful multimodal biometric technology with liveness detection to application developers. Often developers have some trouble writing a user interface collecting the data required to perform the biometric tasks, notably face images. Therefore we want to provide some sample code that might be used as a user interface to the BWS, in this case for a web based application using HTML5 with jQuery.
 
-The **uui** folder contains everything you typically need to run a biometric task within a web browser. There are some `PerformTask` sample implementations (MVC, plain HTML5, PHP, ...) containing the client side code to perform the biometric task. The required javascript-, css- and image-files are in the corresponding folders. The jQuery script `bws.capture.js` does most of the work regarding image capturing, motion detection and AJAX-communication to the BWS. In `clientBin` you find an optionally usable Silverlight module that can be used to capture images in case that the browser does not support the HTML5 Media Capture API. The folder `lang` is for language support and contains json files for each supported language (currently EN and DE are available).
+The **uui** folder contains the basics you typically need to run a biometric task within a web browser. There are some sample implementations (ASP.NET Core, PHP) containing the client side code [uui.cshtml](./samples/aspnetcore/uuisample/views/home/uui.cshtml) or [uui.php](./samples/php/uui.php) to perform the biometric task. The required javascript-, css- and image-files are in the corresponding folders. The jQuery script [bws.capture.js](./uui/js/bws.capture.js) does most of the work regarding image capturing, motion detection and AJAX-communication to the BWS. The folder [lang](./uui/lang/)  is for language support and contains json files for each supported language (currently EN and DE are available). The folder [model](./uui/model) contains the new 3D head. It shows the user the prompted direction for movements.
 
 ### Examples:
 
-Complete samples are provided in the **samples** folder, e.g. there is a Visual Studio ASP.NET MVC project in the `mvc` subfolder. 
+A complete sample is provided in the **samples** folder, there is a Visual Studio ASP.NET Core project in the `aspnetcore` subfolder. 
+For PHP only the uui.php file is available! You must request a BWS token from your server before you can call this Unified User Interface (UUI). Please take a look at the [developer documentation][docs] that helps you to integrate our APIs with REST or SOAP protocol.
 
-To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a trial instance](https://playground.bioid.com/BioIDWebService/TrialInstanceRequisition).
+To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a BWS trial instance][trial] - requires login.
 
-You can also try this BWS user interface via our [Playgound website](https://playground.bioid.com/ExploreBiometrics).
+You can also try this BWS user interface via our [Playgound website][playground] - requires login.
 
-You can find some more information about our [face recognition](https://www.bioid.com) technology.
+You can find some more information about our [face recognition][bioid] technology.
+
+[bioid]: https://www.bioid.com "BioID GmbH Homepage"
+[docs]: https://developer.bioid.com/bwsreference "BWS documentation"
+[playground]: https://playground.bioid.com "BioID Playground"
+[trial]: https://bwsportal.bioid.com/register "Register for a trial instance"

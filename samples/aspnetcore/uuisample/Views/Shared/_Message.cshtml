@@ -1,0 +1,42 @@
+﻿@model MessageViewModel
+<div id="result" class="mt-3">
+    @if (Model != null)
+    {
+        <div class="alert alert-@Model.Theme alert-dismissible fade show" role="alert">
+            @if (!string.IsNullOrEmpty(Model.Heading))
+            {
+                <h4 class="alert-heading">@Model.Heading</h4>
+            }
+            @if (Model.Dismissable)
+            {
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            }
+            @if (!string.IsNullOrEmpty(Model.Text))
+            {
+                <div>@Model.Text</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.HtmlText))
+            {
+                <div>@Html.Raw(Model.HtmlText)</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Footer))
+            {
+                <hr />
+                <div>@Model.Footer</div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Xml))
+            {
+                <div id="heading_xml">
+                    <a class="collapsed" data-toggle="collapse" href="#collapse_xml" aria-expanded="false" aria-controls="collapse_xml">
+                        <i class="fa"></i> XML result message
+                    </a>
+                </div>
+                <div id="collapse_xml" class="collapse" aria-labelledby="heading_xml">
+                    <pre class="mb-0"><code class="xml">@Model.Xml</code></pre>
+                </div>
+            }
+        </div>
+    }
+</div>
