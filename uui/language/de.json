@@ -1,0 +1,40 @@
+{
+  "titleEnrollment": "Einlernen",
+  "titleVerification": "Verifikation",
+  "titleIdentification": "Identifikation",
+  "titleLiveDetection": "Lebenderkennung",
+
+  "buttonCancel.title": "Abbruch und zurück zum Aufrufer",
+  "buttonMirror.title": "Spiegeln des Kamerabildes",
+  "buttonStart.title": "Starte die Aufnahme von Bildern",
+  "buttonContinue.title": "Fortfahren ohne Biometrie",
+  "buttonContinue": "Fortfahren ohne Biometrie",
+  "buttonMobileApp.title": "Fortfahren mit der BioID app",
+  "buttonMobileApp": "Starte BioID app",
+
+  "prompt": "Diese Website benötigt HTML5 Features wie Media Capture und Stream API (getUserMedia(), wie sie bei aktuellen Versionen von Opera, Firefox, Chrome and Edge) vorhanden sind.<br/>Sie müssen den Zugriff auf die Kamera erlauben.",
+  "mobileapp": "Wenn Sie die BioID app auf Ihrem Mobilgerät installiert haben, können Sie diese verwenden.",
+
+  "uploadInfo": "Uploading...",
+
+  "capture-error": "Die Videoaufnahme ist fehlgeschlagen.<br />Scheinbar ist der Kamerazugriff nicht erlaubt.<br />Leider ist dann keine biometrische Gesichtserkennung möglich!",
+  "nogetUserMedia": "Ihr Browser unterstützt das HTML5 Feature Media Capture und Streams API nicht. Vielleicht möchten Sie stattdessen die BioID App für Mobilgeräte benutzen.",
+  "permissionDenied": "Zugriff verweigert!",
+
+  "UserInstruction-3": "3 ...",
+  "UserInstruction-2": "2 ...",
+  "UserInstruction-1": "1 ...",
+  "UserInstruction-FollowMe": "Folgen Sie mir",
+  "UserInstruction-NoMovement": "Bitte bewegen Sie den Kopf...",
+
+  "Perform-enrollment": "Einlernen ...",
+  "Perform-verification": "Verifikation ...",
+  "Perform-identification": "Identifikation ...",
+  "Perform-livenessdetection": "In Bearbeitung ...",
+
+  "NoFaceFound": "Es wurde kein Gesicht gefunden",
+  "MultipleFacesFound": "Mehr als ein Gesicht wurde gefunden",
+  "LiveDetectionFailed": "Lebenderkennung fehlgeschlagen!<br/>Erneuter Versuch...",
+  "ChallengeResponseFailed": "Challenge-Response Erkennung fehlgeschlagen!<br/>Folgen Sie dem Kopf...",
+  "NotRecognized": "Erkennung fehlgeschlagen<br/>Erneuter Versuch..."
+}

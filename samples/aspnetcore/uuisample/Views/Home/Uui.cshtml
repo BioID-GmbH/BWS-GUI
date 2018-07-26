@@ -256,7 +256,7 @@
             let userLang = userLangAttribute.slice(0, 2);
             // let userLocation = userLangAttribute.slice(-2) || 'us';
 
-            $.getJSON('/uui/lang/' + userLang + '.json').
+            $.getJSON('/uui/language/' + userLang + '.json').
             done(function (data) {
                 console.log('Loaded the language-specific resource successfully');
                 localizedData = data;

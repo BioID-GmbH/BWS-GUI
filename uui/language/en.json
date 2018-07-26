@@ -1,0 +1,40 @@
+{
+  "titleEnrollment": "Enrollment",
+  "titleVerification": "Verification",
+  "titleIdentification": "Identification",
+  "titleLiveDetection": "Liveness Detection",
+
+  "buttonCancel.title": "Abort and navigate back to caller",
+  "buttonMirror.title": "Mirror the display of the captured images",
+  "buttonStart.title": "Start the recording of images",
+  "buttonContinue.title": "Skip biometric process",
+  "buttonContinue": "Skip biometrics",
+  "buttonMobileApp.title": "Continue biometric process with BioID app",
+  "buttonMobileApp": "Start BioID app",
+
+  "prompt": "This web page requires the HTML5 Media Capture and Streams API (getUserMedia(), as supported by the actual versions of Opera, Firefox, Chrome and Edge).<br/>You also have to grant access to your camera.",
+  "mobileapp": "If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.",
+
+  "uploadInfo": "Uploading...",
+
+  "capture-error": "The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face/periocular recognition is not possible!",
+  "nogetUserMedia": "Your browser does not support the HTML5 Media Capture and Streams API. You might want to use the BioID mobile App instead.",
+  "permissionDenied": "Permission Denied!",
+
+  "UserInstruction-3": "3 ...",
+  "UserInstruction-2": "2 ...",
+  "UserInstruction-1": "1 ...",
+  "UserInstruction-FollowMe": "Follow Me",
+  "UserInstruction-NoMovement": "Please move your head...",
+
+  "Perform-enrollment": "Training ...",
+  "Perform-verification": "Verifying ...",
+  "Perform-identification": "Identifying ...",
+  "Perform-livenessdetection": "Processing ...",
+
+  "NoFaceFound": "No face found",
+  "MultipleFacesFound": "Upload failed: multiple faces were found",
+  "LiveDetectionFailed": "Live detection failed<br/>Retrying ...",
+  "ChallengeResponseFailed": "Challenge-Response failed!<br/>Follow the head ...",
+  "NotRecognized": "You have not been recognized!<br/>Retrying ..."
+}

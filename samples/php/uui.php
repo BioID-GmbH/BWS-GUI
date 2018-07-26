@@ -292,7 +292,7 @@ if(!empty($claims->task)) {
             let userLang = userLangAttribute.slice(0, 2);
             // let userLocation = userLangAttribute.slice(-2) || 'us';
 
-            $.getJSON('./lang/' + userLang + '.json').
+            $.getJSON('./language/' + userLang + '.json').
             done(function (data) {
                 console.log('Loaded the language-specific resource successfully');
                 localizedData = data;
