@@ -66,7 +66,7 @@
     <script src="~/uui/js/three.min.js"></script>
     <script src="~/uui/js/objLoader.min.js"></script>
     <script type="text/javascript">
-        // execute javascript in 'strict mode'
+           // execute javascript in 'strict mode'
         'use strict';
 
         // disable console output in production
@@ -170,18 +170,10 @@
         });
 
         // called from Start button and onStart to initiate a new recording
-        function startRecording() {
-            $('#uuistart').hide();
-            bwsCapture.startCountdown(function () {
-                for (let i = 1; i <= recordings; i++) {
-                    $('#uuiuploaded' + i).hide();
-                    $('#uuiupload' + i).hide();
-                    $('#uuiwait' + i).show();
-                    $('#uuiimage' + i).show();
-                }
-                var tags = challengeResponse && challenges.length > currentExecution && challenges[currentExecution].length > 0 ? challenges[currentExecution] : [];
-                bwsCapture.startRecording(tags);
-            });
+        function startRecording(countdown) {
+          $('#uuistart').hide();
+          var tags = challengeResponse && challenges.length > currentExecution && challenges[currentExecution].length > 0 ? challenges[currentExecution] : [];
+          bwsCapture.startRecording(tags, countdown);
         }
 
         // called from Mirror button to mirror the captured image
@@ -311,10 +303,10 @@
                 // done
                 stopRecording();
                 currentExecution++;
-               
+
                 if (error !== undefined && retry && currentExecution < executions) {
                     // if failed restart if retries are left, but wait a bit until the user has read the error message!
-                    setTimeout(function () { startRecording(); }, 1800);
+                    setTimeout(function () { startRecording(true); }, 1800);
                     console.log('Current Execution: ' + currentExecution);
                 } else {
                     // done: redirect to caller ...
@@ -340,7 +332,17 @@
                     if (status.indexOf('UserInstruction') > -1) {
                         $msg = $('#uuiinstruction');
                         if (status === 'UserInstruction-Start') {
-                            resetHeadDisplay();
+                          let counter = recordings;
+                          if (counter > 4) {
+                            counter = 4;
+                          }
+                          for (let i = 1; i <= counter; i++) {
+                            $('#uuiuploaded' + i).hide();
+                            $('#uuiupload' + i).hide();
+                            $('#uuiwait' + i).show();
+                            $('#uuiimage' + i).show();
+                          }
+                          resetHeadDisplay();
                         }
                         else {
                             $msg.html(msg);
@@ -350,7 +352,7 @@
 
                     // perform tasks
                     if (status.indexOf('Perform') > -1 || status.indexOf('Retry') > -1) {
-                         // hide head and userinstruction
+                        // hide head and userinstruction
                         hideHead();
                         $('#uuiinstruction').hide();
                         $('#uuicanvas').css('filter', 'blur(10px)');
@@ -382,24 +384,29 @@
                     // display some animations/images depending on the status
                     let uploaded = bwsCapture.getUploaded();
                     let recording = uploaded + bwsCapture.getUploading();
+                    // use modulo calculation for images more than 4
+                    let modRecording = ((recording-1) % 4) + 1;
+                    let modUploaded = ((uploaded-1) % 4) + 1;
 
                     if (status === 'Uploading') {
-                        // begin an upload
-                        $('#uuiwait' + recording).hide();
-                        $('#uuiupload' + recording).show();
+                        // begin an upload - current image
+                        $('#uuiwait' + modRecording).hide();
+                        $('#uuiupload' + modRecording).show();
+                        $('#uuiuploaded' + modRecording).hide();
                     } else if (status === 'Uploaded') {
                         // successfull upload (we should have a dataURL)
                         if (dataURL) {
-                            $('#uuiupload' + uploaded).hide();
-                            let $image = $('#uuiuploaded' + uploaded);
+                            $('#uuiupload' + modUploaded).hide();
+                            let $image = $('#uuiuploaded' + modUploaded);
                             $image.attr('src', dataURL);
                             $image.show();
                         }
                     } else if (status === 'NoFaceFound' || status === 'MultipleFacesFound') {
                         // upload failed
                         recording++;
-                        $('#uuiupload' + recording).hide();
-                        $('#uuiwait' + recording).show();
+                        modRecording = ((recording-1) % 4) + 1;
+                        $('#uuiupload' + modRecording).hide();
+                        $('#uuiwait' + modRecording).show();
                     }
                 }
             });
@@ -416,10 +423,10 @@
             // $('#uuimirror').show().click(mirror);
 
             if (autostart) {
-                setTimeout(startRecording, 1000);
+              setTimeout(function () { startRecording(true); }, 1000);
             }
             else {
-                $('#uuistart').show().click(startRecording);
+              $('#uuistart').show().click(function () { startRecording(task === 'enrollment'); });
             }
         }
 
@@ -429,7 +436,7 @@
             hideHead();
 
             bwsCapture.stopRecording();
-            for (let i = 1; i <= recordings; i++) {
+            for (let i = 1; i <= 4; i++) {
                 $('#uuiimage' + i).hide();
             }
         }
@@ -541,6 +548,7 @@
             if (currentTag !== '') {
                 parentTag = currentTag;
             }
+           
             currentTag = tag;
             startTime = new Date().getTime();
 
@@ -549,7 +557,6 @@
         }
 
         function animateHead() {
-
             // animation time
             let speed = 0.000005;
             let endTime = new Date().getTime();
@@ -566,14 +573,14 @@
                     head.rotation.y = 0;
                     resetHead = false;
                     doAnimation = true;
-
                     showHead();
                 }
                 else {
                     if (currentTag === 'any') {
                         if (task === 'enrollment') {
                             // get predefined direction for better enrollment
-                            currentTag = enrollmentTags[bwsCapture.getUploaded()];
+                            let recording = bwsCapture.getUploaded() + bwsCapture.getUploading() - 1;
+                            currentTag = enrollmentTags[recording];
                         }
                         else {
                             currentTag = predefinedTags[Math.floor(Math.random() * Math.floor(4))];
@@ -641,10 +648,10 @@
                         }
                     }
                 }
+
                 if (doAnimation) {
                     requestAnimationFrame(animateHead);
                 }
-
                 renderer.render(scene, camera);
             }
         }
