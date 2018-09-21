@@ -124,6 +124,7 @@
             'capture-error': 'The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face/periocular recognition is not possible!',
             'nogetUserMedia': 'Your browser does not support the HTML5 Media Capture and Streams API. You might want to use the BioID mobile App instead.',
             'permissionDenied': 'Permission Denied!',
+            'webgl-error': 'WebGL is disabled or unavailable. If possible activate WebGL or use another browser.',
 
             'UserInstruction-3': '3 ...',
             'UserInstruction-2': '2 ...',
@@ -265,9 +266,15 @@
                     recordings: recordings,
                     maxheight: maxHeight
                 });
-                // and start everything
-                onStart();
-                initHead();
+                let success = initHead();
+                if (!success) {
+                    $('#uuierror').html(formatText('webgl-error'));
+                    $('#uuiskip').show();
+                }
+                else {
+                    // and start everything
+                    onStart();
+                }
             });
         }
 
@@ -450,6 +457,14 @@
         const maxHorizontal = 0.25;
 
         function initHead() {
+            // renderer
+            try {
+                renderer = new THREE.WebGLRenderer({ alpha: true });
+            }
+            catch (e) {
+                return false;
+            }
+
             let container = document.getElementById('uuihead');
             document.body.appendChild(container);
 
@@ -498,14 +513,14 @@
                 scene.add(head);
             }, onProgress, onError);
 
-            // renderer
-            renderer = new THREE.WebGLRenderer({ alpha: true });
             renderer.setClearColor(0x000000, 0); // the default
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
 
             container.appendChild(renderer.domElement);
             window.addEventListener('resize', onHeadResize, false);
+
+            return true;
         }
 
         function onHeadResize() {

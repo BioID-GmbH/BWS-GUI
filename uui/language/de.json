@@ -20,6 +20,7 @@
   "capture-error": "Die Videoaufnahme ist fehlgeschlagen.<br />Scheinbar ist der Kamerazugriff nicht erlaubt.<br />Leider ist dann keine biometrische Gesichtserkennung möglich!",
   "nogetUserMedia": "Ihr Browser unterstützt das HTML5 Feature Media Capture und Streams API nicht. Vielleicht möchten Sie stattdessen die BioID App für Mobilgeräte benutzen.",
   "permissionDenied": "Zugriff verweigert!",
+  "webgl-error": "WebGL ist deaktiviert oder nicht verfügbar. Wenn möglich aktivieren sie WebGL oder benutzen sie einen anderen Browser.",
 
   "UserInstruction-3": "3 ...",
   "UserInstruction-2": "2 ...",
