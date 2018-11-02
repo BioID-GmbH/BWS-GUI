@@ -30,32 +30,48 @@
         </section>
         <section id="uuiwebapp" class="webapp">
             <div id="uuiinstruction" class="instruction transparent-background"></div>
-            <canvas id="uuicanvas" class="liveview">
-            </canvas>
+            <canvas id="uuicanvas" class="liveview"></canvas>
             <div id="uuimessage" class="message"></div>
             <div id="uuihead" class="head"></div>
             <a id="uuistart" class="startbutton" href="#"><img src="~/uui/images/play.svg" class="button-big-grow" alt="start" title="Start the recording of images" data-res="buttonStart" /></a>
-            <div class="uploadstatus">
+            <div id="uuisingleupload" class="uploadstatus-single">
                 <!-- status images for up to 4 recordings -->
                 <div id="uuiimage1" class="image">
                     <div id="uuiwait1" class="spinner spinner-wait"></div>
                     <div id="uuiupload1" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded1" class="image-uploaded" />
+                    <div id="uuiprogress1" class="progress-single">
+                        <div id="uuiprogressbar1" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage2" class="image">
                     <div id="uuiwait2" class="spinner spinner-wait"></div>
                     <div id="uuiupload2" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded2" class="image-uploaded" />
+                    <div id="uuiprogress2" class="progress-single">
+                        <div id="uuiprogressbar2" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage3" class="image">
                     <div id="uuiwait3" class="spinner spinner-wait"></div>
                     <div id="uuiupload3" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded3" class="image-uploaded" />
+                    <div id="uuiprogress3" class="progress-single">
+                        <div id="uuiprogressbar3" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage4" class="image">
                     <div id="uuiwait4" class="spinner spinner-wait"></div>
                     <div id="uuiupload4" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded4" class="image-uploaded" />
+                    <div id="uuiprogress4" class="progress-single">
+                        <div id="uuiprogressbar4" class="progressbar"></div>
+                    </div>
+                </div>
+           </div> 
+            <div id="uuicompactupload" class="uploadstatus-compact">
+                <div id="uuiprogresscompact" class="progress-compact">
+                    <div id="uuiprogressbarcompact" class="progressbar"></div>
                 </div>
             </div>
         </section>
@@ -66,7 +82,7 @@
     <script src="~/uui/js/three.min.js"></script>
     <script src="~/uui/js/objLoader.min.js"></script>
     <script type="text/javascript">
-           // execute javascript in 'strict mode'
+        // execute javascript in 'strict mode'
         'use strict';
 
         // disable console output in production
@@ -101,6 +117,9 @@
         var enrollmentTags = ['left', 'right', 'right', 'left', 'up', 'down', 'down', 'up'];
         var predefinedTags = ['left', 'right', 'up', 'down'];
 
+        // map for the compact upload
+        var progressMap = new Map();
+
         // localized messages (english defaults, might get overloaded in initialize())
         var localizedData = {
             'titleEnrollment': 'Enrollment',
@@ -130,7 +149,7 @@
             'UserInstruction-2': '2 ...',
             'UserInstruction-1': '1 ...',
             'UserInstruction-FollowMe': 'Follow Me',
-            'UserInstruction-NoMovement': 'Please move your head...',
+            'UserInstruction-NoMovement': 'Please move your head ...',
 
             'Perform-enrollment': 'Training ...',
             'Perform-verification': 'Verifying ...',
@@ -253,7 +272,7 @@
             done(function (data) {
                 console.log('Loaded the language-specific resource successfully');
                 localizedData = data;
-            }).fail(function (jqxhr, textStatus, error) {
+            }).fail(function (textStatus, error) {
                 console.log('Loading of language-specific resource failed with: ' + textStatus + ', ' + error);
             }).always(function () {
                 localize();
@@ -326,7 +345,32 @@
                 }
             }, function (status, message, dataURL) {
                 let $msg;
-                if (status === 'DisplayTag') {
+                if (status === 'UploadProgress') {
+                    // for single upload status
+                    let id = message.id;
+                    let modId = ((id - 1) % 4) + 1;
+                    // for compact upload status
+                    let progresscompact = 0;
+                    progressMap.set(id, message.progress);
+                    progressMap.forEach((value) => progresscompact += value);
+                    progresscompact = Math.ceil(progresscompact / recordings);
+                    if (progresscompact > 100) {
+                        progresscompact = 100;
+                    }
+
+                    // css media query decision
+                    if ($('#uuisingleupload').is(':visible') == true) {
+                        $('#uuiprogress' + modId).show();
+                        $('#uuiprogressbar' + modId).width(message.progress + '%');
+                        // if the window size changed
+                        $('#uuiprogresscompact').hide();
+                    }
+                    else {
+                        $('#uuiprogresscompact').show();
+                        $('#uuiprogressbarcompact').width(progresscompact + '%');
+                    }
+                }
+                else if (status === 'DisplayTag') {
                     setCurrentTag(message);
                     $msg = $('#uuiinstruction');
                     $msg.html(formatText('UserInstruction-FollowMe'));
@@ -348,7 +392,12 @@
                             $('#uuiupload' + i).hide();
                             $('#uuiwait' + i).show();
                             $('#uuiimage' + i).show();
+                            $('#uuiprogress' + i).hide();
+                            $('#uuiprogressbar' + i).width(0);
                           }
+                          progressMap.clear();
+                          $('#uuiprogresscompact').hide();
+                          $('#uuiprogressbarcompact').width(0);
                           resetHeadDisplay();
                         }
                         else {
@@ -359,15 +408,12 @@
 
                     // perform tasks
                     if (status.indexOf('Perform') > -1 || status.indexOf('Retry') > -1) {
-                        // hide head and userinstruction
-                        hideHead();
-                        $('#uuiinstruction').hide();
-                        $('#uuicanvas').css('filter', 'blur(10px)');
-
                         // show message
                         $msg = $('#uuimessage');
                         $msg.html(msg);
                         $msg.stop(true).fadeIn().delay(1800).fadeOut();
+                        // hide compact upload progress 
+                        $('#uuiprogresscompact').hide();
                     }
 
                     // results of uploading or perform task
@@ -400,10 +446,22 @@
                         $('#uuiwait' + modRecording).hide();
                         $('#uuiupload' + modRecording).show();
                         $('#uuiuploaded' + modRecording).hide();
+
+                        // if uuiuploaded is not visible -> mobile view
+                        if (recording >= recordings) {
+                            hideHead();
+                            $('#uuiinstruction').hide();
+                            $('#uuicanvas').css('filter', 'blur(10px)');
+
+                            $msg = $('#uuimessage');
+                            $msg.html(formatText('uploadInfo'));
+                            $msg.stop(true).fadeIn();
+                        }
                     } else if (status === 'Uploaded') {
                         // successfull upload (we should have a dataURL)
                         if (dataURL) {
-                            $('#uuiupload' + modUploaded).hide();
+                            $('#uuiupload' + modUploaded).hide();                       
+                            $('#uuiprogress' + modUploaded).hide();
                             let $image = $('#uuiuploaded' + modUploaded);
                             $image.attr('src', dataURL);
                             $image.show();

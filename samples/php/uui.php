@@ -26,32 +26,48 @@
         </section>
         <section id="uuiwebapp" class="webapp">
             <div id="uuiinstruction" class="instruction transparent-background"></div>
-            <canvas id="uuicanvas" class="liveview">
-            </canvas>
+            <canvas id="uuicanvas" class="liveview"></canvas>
             <div id="uuimessage" class="message"></div>
             <div id="uuihead" class="head"></div>
             <a id="uuistart" class="startbutton" href="#"><img src="./images/play.svg" class="button-big-grow" alt="start" title="Start the recording of images" data-res="buttonStart" /></a>
-            <div class="uploadstatus">
+            <div id="uuisingleupload" class="uploadstatus-single">
                 <!-- status images for up to 4 recordings -->
                 <div id="uuiimage1" class="image">
                     <div id="uuiwait1" class="spinner spinner-wait"></div>
                     <div id="uuiupload1" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded1" class="image-uploaded" />
+                    <div id="uuiprogress1" class="progress-single">
+                        <div id="uuiprogressbar1" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage2" class="image">
                     <div id="uuiwait2" class="spinner spinner-wait"></div>
                     <div id="uuiupload2" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded2" class="image-uploaded" />
+                    <div id="uuiprogress2" class="progress-single">
+                        <div id="uuiprogressbar2" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage3" class="image">
                     <div id="uuiwait3" class="spinner spinner-wait"></div>
                     <div id="uuiupload3" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded3" class="image-uploaded" />
+                    <div id="uuiprogress3" class="progress-single">
+                        <div id="uuiprogressbar3" class="progressbar"></div>
+                    </div>
                 </div>
                 <div id="uuiimage4" class="image">
                     <div id="uuiwait4" class="spinner spinner-wait"></div>
                     <div id="uuiupload4" class="spinner spinner-upload" data-res="uploadInfo">Uploading...</div>
                     <img id="uuiuploaded4" class="image-uploaded" />
+                    <div id="uuiprogress4" class="progress-single">
+                        <div id="uuiprogressbar4" class="progressbar"></div>
+                    </div>
+                </div>
+           </div> 
+            <div id="uuicompactupload" class="uploadstatus-compact">
+                <div id="uuiprogresscompact" class="progress-compact">
+                    <div id="uuiprogressbarcompact" class="progressbar"></div>
                 </div>
             </div>
         </section>
@@ -116,8 +132,8 @@ if(!empty($claims->task)) {
     <script src="./js/three.min.js"></script>
     <script src="./js/objLoader.min.js"></script>
 
-    <script type="text/javascript">
-        // BEGIN OF CONFIGURATION
+     <script type="text/javascript">
+      // BEGIN OF CONFIGURATION
         var token = <?php echo "\"$access_token\""; ?>;
         var returnURL = <?php echo "\"$return_url\""; ?>;
         var state = <?php echo "\"$state\""; ?>;
@@ -132,6 +148,7 @@ if(!empty($claims->task)) {
         var maxHeight = <?php echo $maxHeight; ?>;
         // END OF CONFIGURATION
 
+
         // BWS capture jQuery plugin
         var bwsCapture = null;
 
@@ -144,6 +161,9 @@ if(!empty($claims->task)) {
         // enrollment without challenge response
         var enrollmentTags = ['left', 'right', 'right', 'left', 'up', 'down', 'down', 'up'];
         var predefinedTags = ['left', 'right', 'up', 'down'];
+
+        // map for the compact upload
+        var progressMap = new Map();
 
         // localized messages (english defaults, might get overloaded in initialize())
         var localizedData = {
@@ -168,13 +188,13 @@ if(!empty($claims->task)) {
             'capture-error': 'The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face/periocular recognition is not possible!',
             'nogetUserMedia': 'Your browser does not support the HTML5 Media Capture and Streams API. You might want to use the BioID mobile App instead.',
             'permissionDenied': 'Permission Denied!',
-			'webgl-error': 'WebGL is disabled or unavailable. If possible activate WebGL or use another browser.',
+            'webgl-error': 'WebGL is disabled or unavailable. If possible activate WebGL or use another browser.',
 
             'UserInstruction-3': '3 ...',
             'UserInstruction-2': '2 ...',
             'UserInstruction-1': '1 ...',
             'UserInstruction-FollowMe': 'Follow Me',
-            'UserInstruction-NoMovement': 'Please move your head...',
+            'UserInstruction-NoMovement': 'Please move your head ...',
 
             'Perform-enrollment': 'Training ...',
             'Perform-verification': 'Verifying ...',
@@ -297,7 +317,7 @@ if(!empty($claims->task)) {
             done(function (data) {
                 console.log('Loaded the language-specific resource successfully');
                 localizedData = data;
-            }).fail(function (jqxhr, textStatus, error) {
+            }).fail(function (textStatus, error) {
                 console.log('Loading of language-specific resource failed with: ' + textStatus + ', ' + error);
             }).always(function () {
                 localize();
@@ -370,7 +390,32 @@ if(!empty($claims->task)) {
                 }
             }, function (status, message, dataURL) {
                 let $msg;
-                if (status === 'DisplayTag') {
+                if (status === 'UploadProgress') {
+                    // for single upload status
+                    let id = message.id;
+                    let modId = ((id - 1) % 4) + 1;
+                    // for compact upload status
+                    let progresscompact = 0;
+                    progressMap.set(id, message.progress);
+                    progressMap.forEach((value) => progresscompact += value);
+                    progresscompact = Math.ceil(progresscompact / recordings);
+                    if (progresscompact > 100) {
+                        progresscompact = 100;
+                    }
+
+                    // css media query decision
+                    if ($('#uuisingleupload').is(':visible') == true) {
+                        $('#uuiprogress' + modId).show();
+                        $('#uuiprogressbar' + modId).width(message.progress + '%');
+                        // if the window size changed
+                        $('#uuiprogresscompact').hide();
+                    }
+                    else {
+                        $('#uuiprogresscompact').show();
+                        $('#uuiprogressbarcompact').width(progresscompact + '%');
+                    }
+                }
+                else if (status === 'DisplayTag') {
                     setCurrentTag(message);
                     $msg = $('#uuiinstruction');
                     $msg.html(formatText('UserInstruction-FollowMe'));
@@ -392,7 +437,12 @@ if(!empty($claims->task)) {
                             $('#uuiupload' + i).hide();
                             $('#uuiwait' + i).show();
                             $('#uuiimage' + i).show();
+                            $('#uuiprogress' + i).hide();
+                            $('#uuiprogressbar' + i).width(0);
                           }
+                          progressMap.clear();
+                          $('#uuiprogresscompact').hide();
+                          $('#uuiprogressbarcompact').width(0);
                           resetHeadDisplay();
                         }
                         else {
@@ -403,15 +453,12 @@ if(!empty($claims->task)) {
 
                     // perform tasks
                     if (status.indexOf('Perform') > -1 || status.indexOf('Retry') > -1) {
-                        // hide head and userinstruction
-                        hideHead();
-                        $('#uuiinstruction').hide();
-                        $('#uuicanvas').css('filter', 'blur(10px)');
-
                         // show message
                         $msg = $('#uuimessage');
                         $msg.html(msg);
                         $msg.stop(true).fadeIn().delay(1800).fadeOut();
+                        // hide compact upload progress 
+                        $('#uuiprogresscompact').hide();
                     }
 
                     // results of uploading or perform task
@@ -444,10 +491,22 @@ if(!empty($claims->task)) {
                         $('#uuiwait' + modRecording).hide();
                         $('#uuiupload' + modRecording).show();
                         $('#uuiuploaded' + modRecording).hide();
+
+                        // if uuiuploaded is not visible -> mobile view
+                        if (recording >= recordings) {
+                            hideHead();
+                            $('#uuiinstruction').hide();
+                            $('#uuicanvas').css('filter', 'blur(10px)');
+
+                            $msg = $('#uuimessage');
+                            $msg.html(formatText('uploadInfo'));
+                            $msg.stop(true).fadeIn();
+                        }
                     } else if (status === 'Uploaded') {
                         // successfull upload (we should have a dataURL)
                         if (dataURL) {
-                            $('#uuiupload' + modUploaded).hide();
+                            $('#uuiupload' + modUploaded).hide();                       
+                            $('#uuiprogress' + modUploaded).hide();
                             let $image = $('#uuiuploaded' + modUploaded);
                             $image.attr('src', dataURL);
                             $image.show();
@@ -501,14 +560,14 @@ if(!empty($claims->task)) {
         const maxHorizontal = 0.25;
 
         function initHead() {
-		    // renderer
+            // renderer
             try {
                 renderer = new THREE.WebGLRenderer({ alpha: true });
             }
             catch (e) {
                 return false;
             }
-			
+
             let container = document.getElementById('uuihead');
             document.body.appendChild(container);
 
@@ -556,15 +615,15 @@ if(!empty($claims->task)) {
                 head.position.y = 0;
                 scene.add(head);
             }, onProgress, onError);
- 
+
             renderer.setClearColor(0x000000, 0); // the default
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(width, height);
 
             container.appendChild(renderer.domElement);
             window.addEventListener('resize', onHeadResize, false);
-			
-			return true;
+
+            return true;
         }
 
         function onHeadResize() {

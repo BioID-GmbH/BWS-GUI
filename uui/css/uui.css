@@ -4,9 +4,8 @@
     .navigation { top: 60px; left: 0; width: 60px; }
     .prompt { margin: 110px 10px 0; }
     .instruction { top: 20px; }
-    .uploadstatus { display: none; }
+    .uploadstatus-single { display: none; }
 }
-
 
 /* Extra small devices (portrait phones, less than 576px) */
 @media (max-width: 575.98px) and (min-height: 740px) {
@@ -14,7 +13,7 @@
     .navigation { top: 10px; left: 0; width: 60px; }
     .prompt { margin: 80px 10px 0; }
     .instruction { top: 80px; }
-    .uploadstatus { display: none; }
+    .uploadstatus-single { display: none; }
 }
 
 /* Small devices (landscape phones, 576px and up) */
@@ -22,20 +21,20 @@
     html { font-size: 12px; }
     .navigation { top: 10px; left: 10px; width: 60px; }
     .prompt { margin: 96px 100px 0; }
-    .uploadstatus { display: none; } 
+    .uploadstatus-single { display: none; }
 }
 
 /* Medium devices (tablets, 768px and up) */
 @media (min-width: 768px) {
      html { font-size: 15px; }
     .navigation {  top: 40px; left: 35px; width: 120px; }
-    .uploadstatus { display: none; }
+    .uploadstatus-single { display: none; }
 }
 
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {
      html { font-size: 16px; }
-    .uploadstatus { display: block; }
+    .uploadstatus-single { display: block; }
 }
 
 body {
@@ -88,14 +87,6 @@ body {
     font-size: 1.5rem;
 }
 
-.uploadstatus {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    color: black;
-    text-align: right;
-}
-
 .prompt {
     position: absolute;
     font-size: 1.5rem;
@@ -142,6 +133,21 @@ body {
     z-index: -1;
 }
 
+.uploadstatus-single {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    color: black;
+    text-align: right;
+}
+
+.uploadstatus-compact {
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+}
+
 .head {
     display: none; 
     position: absolute;
@@ -175,6 +181,29 @@ body {
     text-align: center;
     width: 90px;
     height: 120px;
+}
+
+.progress-single {
+    display: none;
+    margin-top: 5px;
+    width: 90px;
+    background-color: #e9ecef;
+    border-radius: .25rem;
+}
+
+.progress-compact {
+    display: none;
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: .25rem;
+}
+
+.progressbar {
+    display: block;
+    height: 10px;
+    width: 0;
+    background-color: #007bff;
+    border-radius: .25rem;
 }
 
 .transparent-background {

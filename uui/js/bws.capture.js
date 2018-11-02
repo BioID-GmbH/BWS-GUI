@@ -1,5 +1,5 @@
-﻿/*! BioID Web Service - 2018-04-07
-*   image capture and recognition library - v2.0.0
+﻿/*! BioID Web Service - 2018-10-29
+*   image capture and recognition library - v2.1.0
 *   https://www.bioid.com
 *   Copyright (C) BioID GmbH.
 */
@@ -21,7 +21,7 @@
             challengeResponse: false,
             motionareaheight: 160,
             threshold: 25,
-            mirror: true   
+            mirror: true
         };
 
         // apply options to our default settings
@@ -50,7 +50,7 @@
 
         // we need to put some additional things into our closure
         var videoStream;
-        var processInterval; 
+        var processInterval;
 
         // timer for 'No Motion' and 'No Activity'
         var noMotionTimer;
@@ -58,7 +58,7 @@
 
         // possible status values: 
         //  UserInstruction-Start, UserInstruction-1, UserInstruction-2, UserInstruction-3, UserInstruction-NoMovement, 
-        //  Uploading, Uploaded, DisplayTag, Perform-verification, Perform-identification, Perform-enrollment, Perform-livenessdetection,
+        //  Uploading, Uploaded, UploadProgress, DisplayTag, Perform-verification, Perform-identification, Perform-enrollment, Perform-livenessdetection,
         //  NoFaceFound, MultipleFacesFound, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized, NoTemplateAvailable
         var statusCallback; // arguments: status { message | tag } { dataURL }
         var doneCallback; // arguments: error
@@ -74,15 +74,15 @@
         // onStatus(status, message, dataURL) is optional
         var start = function (onSuccess, onFailure, onDone, onStatus) {
             console.log('Starting capture...');
-            doneCallback = onDone;          
+            doneCallback = onDone;
             statusCallback = onStatus;
-           
+
             if (videoStream) {
                 // we have been started already
                 return;
             }
-            
-            var constraints = { audio: false, video: { facingMode: "user" } }; 
+
+            var constraints = { audio: false, video: { facingMode: "user" } };
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function (mediaStream) {
                     console.log('Video capture stream has been created with constraints:', constraints);
@@ -90,7 +90,7 @@
                     video.srcObject = mediaStream;
                     video.onloadedmetadata = function (e) {
                         video.play();
-                        console.log('Playing live media stream');        
+                        console.log('Playing live media stream');
                         // init the various canvases ...
                         initializeCanvases();
                         console.log('capture started');
@@ -168,6 +168,7 @@
             clearInterval(noActivityTimer);
             uploaded = 0;
             uploading = 0;
+            captured = 0;
             template = null;
             capturing = capture;
         }
@@ -211,12 +212,12 @@
             // Drawing ellipse liveview
             let scaleX = 0.8;
             let scaleY = 1.1;
-            let gradient = draw.createRadialGradient(canvas.width/2 * 1/scaleX, canvas.height/2 * 1/scaleY, 0, canvas.width/2 * 1/scaleX, canvas.height/2 * 1/scaleY, w * 0.5);
+            let gradient = draw.createRadialGradient(canvas.width / 2 * 1 / scaleX, canvas.height / 2 * 1 / scaleY, 0, canvas.width / 2 * 1 / scaleX, canvas.height / 2 * 1 / scaleY, w * 0.5);
             gradient.addColorStop(0.98, 'transparent');
             gradient.addColorStop(0.99, 'rgba(255, 255, 255, 1)');
             draw.fillStyle = gradient;
             draw.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-            draw.fillRect(0, 0, canvas.width * 1 / scaleX, canvas.height * 1 / scaleY);       
+            draw.fillRect(0, 0, canvas.width * 1 / scaleX, canvas.height * 1 / scaleY);
 
             if (capturing && uploaded < settings.recordings) {
                 // we may need to switch on the tags again ??????
@@ -297,37 +298,51 @@
                     // the call below typically requires Cross-Origin Resource Sharing!
                     console.log('this browser does not support cors, e.g. IE8 or 9');
                 }
-
                 let jqxhr = $.ajax({
                     type: 'POST',
                     url: settings.apiurl + 'upload?tag=' + tag + '&index=' + captured + '&trait=' + settings.trait,
                     data: dataURL,
                     // don't forget the authentication header
-                    headers: { 'Authorization': 'Bearer ' + token }
-                }).done(function (data, textStatus, jqXHR) {
+                    headers: { 'Authorization': 'Bearer ' + token },
+                    // upload progress
+                    xhr: function () {
+                        var xhr = new window.XMLHttpRequest();
+                        xhr.upload.id = captured;
+                        xhr.upload.addEventListener('progress', function (event) {
+                            let percent = 0;
+                            if (event.lengthComputable) {
+                                percent = Math.ceil(event.loaded / event.total * 100);
+                                let progressData = { id: this.id, progress: percent };
+                                if (statusCallback) { statusCallback('UploadProgress', progressData); }
+                            }
+                        }, false);
+                        return xhr;
+                    }
+                }).done(function (data) {
                     uploading--;
                     if (data.Accepted) {
                         uploaded++;
                         console.log('upload succeeded', data.Warnings);
                         if (statusCallback) { statusCallback('Uploaded', data.Warnings.toString(), dataURL); }
+                        if (uploaded >= settings.recordings && uploading === 0) {
+                            // go for biometric task
+                            performTask();
+                        }
                     } else {
                         console.log('upload error', data.Error);
                         if (statusCallback) { statusCallback(data.Error); }
+                        
                         if (uploaded < 1) {
                             // restart process (retry)
-                            // TODO: hmmm, really?
                             doneCallback('NoFaceFound', true);
                         }
                         else {
                             // use performTask to cleanup already uploaded image
                             // TODO: this is a dummy call!
+                            capturing = false;
                             performTask();
                         }
-                    }
-                    if (uploaded >= settings.recordings && uploading === 0) {
-                        // go for biometric task
-                        performTask();
-                    }
+                    }   
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     // ups, call failed, typically due to
                     // Unauthorized (invalid token) or
@@ -339,13 +354,13 @@
                     doneCallback(errorThrown);
                 });
                 // show a new tag if neccessary
-                if (uploaded < settings.recordings-1) {
+                if (uploaded + uploading < settings.recordings) {
                     setTag();
                 }
             }
         }
 
-        // perform biometric task enrollment, verification or identification with already uploaded images
+        // perform biometric task enrollment, verification, identification or liveness detection with already uploaded images
         function performTask() {
             // we already have all images the motion timer is no longer required
             clearInterval(noMotionTimer);
@@ -449,12 +464,12 @@
             }
 
             if (statusCallback) { statusCallback('DisplayTag', tag); }
-            
+
             if (capturing) {
                 // give user some time to react!
                 capturing = false;
                 setTimeout(function () { if (template !== null) capturing = true; }, 1000);
-            }        
+            }
         }
 
         /* ------------------------ Motion Detection functions ------------------------ */
@@ -518,7 +533,7 @@
                             bufferIndex += 4;
                         }
                     }
-                       
+
                     // The NCC coefficient is then (watch out for division-by-zero errors for pure black images)
                     let ncc = 0.0;
                     if (denominator > 0) {
@@ -535,7 +550,7 @@
             // now the most similar position of the template is (bestHitX, bestHitY). Calculate the difference from the origin
             let distX = bestHitX - template.xPos,
                 distY = bestHitY - template.yPos,
-                movementDiff = Math.sqrt(distX * distX  + distY * distY);
+                movementDiff = Math.sqrt(distX * distX + distY * distY);
             // the maximum movement possible is a complete shift into one of the corners, i.e
             let maxDistX = searchWidth - template.width / 2,
                 maxDistY = searchHeight - template.height / 2,
@@ -559,6 +574,6 @@
             mirror: mirror,
             getUploading: function () { return uploading; },
             getUploaded: function () { return uploaded; }
-        };   
+        };
     };
 }(window.bws = window.bws || {}, jQuery));
