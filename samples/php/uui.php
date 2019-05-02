@@ -126,7 +126,7 @@ if(!empty($claims->task)) {
 }
 ?> 
 
-    <script src="./js/jquery-3.3.1.min.js"></script>
+    <script src="./js/jquery-3.4.1.min.js"></script>
     <script src="./js/getUserMedia.min.js"></script>
     <script src="./js/bws.capture.js"></script>
     <script src="./js/three.min.js"></script>
