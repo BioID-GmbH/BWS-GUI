@@ -94,6 +94,15 @@ if(substr_compare($api_url, "/", -1) != 0) {
 	$api_url = $api_url + "/";
 }
 
+// is mobile device?
+$userAgent = $_SERVER["HTTP_USER_AGENT"];
+if (stripos($userAgent, 'mobi') !== false) {
+   $motionThreshold = 50;
+}
+else {
+   $motionThreshold = 25;
+}
+
 $state = $_GET["state"];
 $autostart = (boolean)$_GET["autostart"];
 $trait = $_GET["trait"]; // backward compatibility (typically overwritten by $claims->traits)
@@ -102,6 +111,7 @@ $autoenroll = false;
 $maxHeight = 320;
 $maxtries = 3;
 $recordings = 1;
+$threshold = $motionThreshold;
 $challenge = false;
 $challenges = "[]";
 
@@ -142,6 +152,7 @@ if(!empty($claims->task)) {
         var trait = <?php echo "\"$trait\""; ?>;
         var executions = <?php echo "\"$maxtries\""; ?>;
         var recordings = <?php echo "\"$recordings\""; ?>;
+        var threshold = <?php echo "\"$threshold\""; ?>;
         var autostart = <?php echo $autostart ? 'true' : 'false'; ?>;
         var challengeResponse = <?php echo $challenge ? 'true' : 'false'; ?>;
         var challenges = <?php echo $challenges; ?>;
@@ -328,6 +339,7 @@ if(!empty($claims->task)) {
                     trait: trait,
                     challengeResponse: challengeResponse,
                     recordings: recordings,
+                    threshold: threshold,
                     maxheight: maxHeight
                 });
                 let success = initHead();

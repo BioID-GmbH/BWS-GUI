@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -96,6 +96,7 @@ namespace uuisample.Controllers
                             "verification",
                         MaxTries = (int)(taskFlags & TokenTask.MaxTriesMask),
                         Recordings = recordings,
+                        MotionThreshold = MobileDevice.IsMobileDevice(Request) ? Constants.MotionThresholdMobile : Constants.MotionThreshold,
                         ChallengeResponse = (taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse,
                         ChallengesJson = challengesJson,
                         Token = access_token,
@@ -218,6 +219,7 @@ namespace uuisample.Controllers
             public string Trait { get; set; }
             public int Recordings { get; set; }
             public int MaxTries { get; set; }
+            public int MotionThreshold { get; set; }
             public bool ChallengeResponse { get; set; }
             public string ChallengesJson { get; set; }
             public bool AutoEnroll { get; set; }

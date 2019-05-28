@@ -97,6 +97,7 @@
         var trait = '@Model.Trait';
         var executions = @Model.MaxTries;
         var recordings = @Model.Recordings;
+        var threshold = @Model.MotionThreshold;
         var autostart = @(Model.AutoStart ? "true" : "false");
         var challengeResponse = @(Model.ChallengeResponse ? "true" : "false");
         var challenges = @Html.Raw(Model.ChallengesJson);
@@ -281,6 +282,7 @@
                     apiurl: apiurl,
                     task: task,
                     trait: trait,
+                    threshold: threshold,
                     challengeResponse: challengeResponse,
                     recordings: recordings,
                     maxheight: maxHeight
