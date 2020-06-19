@@ -1,16 +1,16 @@
-﻿/*! BioID Web Service - 2018-10-29
-*   image capture and recognition library - v2.1.0
+﻿/*! BioID Web Service - 2020-03-10
+*   image capture and recognition library - v3.0.0
 *   https://www.bioid.com
 *   Copyright (C) BioID GmbH.
 */
 
 
-(function (bws, $, undefined) {
+(function (bws, $, _undefined) {
     // execute javascript in 'strict mode'
     'use strict';
 
     // init image capture and recognition library
-    bws.initcapture = function (canvasElement, issuedToken, options) {
+    bws.initcapture = function (canvasElement, videoElement, issuedToken, options) {
         var defaults = {
             apiurl: 'https://bws.bioid.com/extension/',
             task: 'verification', // | identification | enrollment | livenessdetection
@@ -39,8 +39,8 @@
         var token = issuedToken;
 
         // private helper elements
-        var video = document.createElement('video');
-        // required for iOS 11 Safari
+        // required for iOS 13 Safari
+        var video = videoElement;
         video.setAttribute('playsinline', '');
         var copycanvas = document.createElement('canvas');
         var motioncanvas = document.createElement('canvas');
@@ -57,7 +57,7 @@
         var noActivityTimer;
 
         // possible status values: 
-        //  UserInstruction-Start, UserInstruction-1, UserInstruction-2, UserInstruction-3, UserInstruction-NoMovement, 
+        //  UserInstruction-NodYourHead, UserInstruction-FollowMe, UserInstruction-NoMovement, UserInstruction-PleaseWait
         //  Uploading, Uploaded, UploadProgress, DisplayTag, Perform-verification, Perform-identification, Perform-enrollment, Perform-livenessdetection,
         //  NoFaceFound, MultipleFacesFound, LiveDetectionFailed, ChallengeResponseFailed, NotRecognized, NoTemplateAvailable
         var statusCallback; // arguments: status { message | tag } { dataURL }
@@ -120,19 +120,10 @@
         };
 
         // public method to start the biometric process
-        var startRecording = function (challenges, countdown) {
+        var startRecording = function (challenges) {
             recording(false);
             tags = challenges ? challenges : [];
-            if (countdown && statusCallback) {
-                // use countdown
-                statusCallback('UserInstruction-3');
-                setTimeout(function () { statusCallback('UserInstruction-2'); }, 400);
-                setTimeout(function () { statusCallback('UserInstruction-1'); }, 800);
-                setTimeout(initRecording, 1200);
-            }
-            else {
-                initRecording();
-            }
+            initRecording();
         };
 
         /* ------------------------ Private image capturing functions ------------------ */
@@ -175,7 +166,7 @@
 
         // private worker method for each frame
         function processFrame() {
-            let x = 0, y = 0, w = copycanvas.width, h = copycanvas.height, aspectratio = w / h;
+            let w = copycanvas.width, h = copycanvas.height, aspectratio = w / h;
             let cutoff = video.videoWidth - (video.videoHeight * aspectratio);
             let draw = canvas.getContext('2d');
             let copy = copycanvas.getContext('2d');
@@ -183,42 +174,55 @@
             // we draw the frames manually using the private video element and the copy interim canvas
             copy.drawImage(video, cutoff / 2, 0, video.videoWidth - cutoff, video.videoHeight, 0, 0, copycanvas.width, copycanvas.height);
 
-            // ensure that the canvas does not scale internally
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-
-            // white background
-            draw.fillStyle = 'white';
-            draw.fillRect(0, 0, canvas.width, canvas.height);
-
-            // center image in canvas
-            if (canvas.width / canvas.height > aspectratio) {
-                // center horizontally
-                y = 0;
-                h = canvas.height;
-                w = h * aspectratio;
-                x = (canvas.width - w) / 2;
+            // at first we need aspectration of the video - portrait or landscape size
+            let aspectrationvideo = video.videoWidth / video.videoHeight;
+            let offset = 0;
+            
+            if (aspectrationvideo > 1) { // e.g 640x480
+                if (window.innerWidth / window.innerHeight > 1) {
+                    canvas.height = window.innerHeight/3*1.7;
+                    canvas.width = canvas.height / aspectratio;
+                }
+                else {
+                    canvas.width = window.innerWidth - 20;
+                    canvas.height = canvas.width * aspectratio;
+                }
             }
-            else {
-                // center vertically
-                x = 0;
-                w = canvas.width;
-                h = w / aspectratio;
-                y = (canvas.height - h) / 2;
+            else { // 0.75 e.g. 480/640
+                offset = 10; // for circle
+                canvas.width = window.innerWidth - 20;
+                canvas.height = canvas.width / aspectrationvideo;
             }
-
-            draw.drawImage(copycanvas, 0, 0, copycanvas.width, copycanvas.height, x, y, w, h);
-
-            // Drawing ellipse liveview
-            let scaleX = 0.8;
-            let scaleY = 1.1;
-            let gradient = draw.createRadialGradient(canvas.width / 2 * 1 / scaleX, canvas.height / 2 * 1 / scaleY, 0, canvas.width / 2 * 1 / scaleX, canvas.height / 2 * 1 / scaleY, w * 0.5);
+           
+            draw.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Drawing default white background e.g. Safari does not support canvas filter 'blur'!
+            w = canvas.height * aspectratio - offset;
+            let gradient = draw.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, w * 0.5);
             gradient.addColorStop(0.98, 'transparent');
-            gradient.addColorStop(0.99, 'rgba(255, 255, 255, 1)');
+            gradient.addColorStop(0.99, 'rgba(255, 255, 255, 0.8)');
             draw.fillStyle = gradient;
-            draw.setTransform(scaleX, 0, 0, scaleY, 0, 0);
-            draw.fillRect(0, 0, canvas.width * 1 / scaleX, canvas.height * 1 / scaleY);
+            draw.setTransform(1, 0, 0, 1, 0, 0);
+            draw.fillRect(0, 0, canvas.width, canvas.height);
+           
+            // Drawing white circle into liveview
+            draw.filter = 'none';
 
+            draw.beginPath();
+            draw.arc(canvas.width / 2, canvas.height / 2, w * 0.5, 0, 2 * Math.PI);
+            draw.lineWidth = 5;
+            draw.strokeStyle = '#FFFFFF';
+            draw.stroke();
+            draw.closePath();
+            draw.clip();
+
+            draw.drawImage(video, 0, 0, canvas.width, canvas.height);
+            draw.restore();
+
+            // fire event for uuicanvas size change
+            var event = new Event('uuiresize');
+            document.dispatchEvent(event);
+         
             if (capturing && uploaded < settings.recordings) {
                 // we may need to switch on the tags again ??????
                 //if (settings.challengeResponse && tag === 'any') { setTag(); }
@@ -253,7 +257,7 @@
 
         /* ------------------------ Timer functions ----------------------------------- */
 
-        // we give a NoMovement response every 6 seconds
+        // we give a NoMovement response every 5 seconds
         function startMotionTimer() {
             clearInterval(noMotionTimer);
             noMotionTimer = setInterval(function () {
@@ -330,7 +334,7 @@
                         }
                     } else {
                         console.log('upload error', data.Error);
-                        if (statusCallback) { statusCallback(data.Error); }
+                        if (statusCallback) { statusCallback(data.Error); } 
                         
                         if (uploaded < 1) {
                             // restart process (retry)

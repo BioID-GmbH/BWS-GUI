@@ -4,32 +4,118 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>BWS Unified User Interface</title>
-    <link href="./css/uui.min.css" rel="stylesheet" />
+    <link href="./css/uui.css" rel="stylesheet" />
 </head>
 <body>
     <header class="header">
-        <img class="logo" src="./images/bioid-logo.svg" alt="BioID Logo" />
+        <img class="logo" src="./images/logo.svg" alt="BioID Logo" />
         <div id="uuititle" class="title" data-res="titleVerification"></div>
     </header>
     <main class="main">
-        <section class="navigation">
-            <a id="uuicancel" href=""><img src="./images/abort.svg" class="button-grow" alt="abort" title="Abort and navigate back to caller" data-res="buttonCancel" /></a>
-            <a id="uuimirror" href="#" class="hidden"><img src="./images/mirror.svg" class="button-grow" alt="mirror" title="Mirror the display of the captured images" data-res="buttonMirror" /></a>
-        </section>
-        <section id="uuisplash">
-            <div id="uuiprompt" class="prompt">
-                <p data-res="prompt"></p>
-                <p id="uuierror" class="alert-danger"></p>
-                <a id="uuiskip" class="button" href="" title="Skip biometric process" data-res="buttonContinue">Skip biometrics</a>
-                <a id="uuimobileapp" class="button" href="" title="Start the BioID app" data-res="buttonMobileApp">Start BioID app</a>
+        <div class="abortbutton">
+            <a id="uuicancel" href="" style="text-decoration:none;"><img src="./images/back.svg" class="button-back" alt="abort" data-res="buttonCancel" /><span class="action-title ml-3" data-res="buttonCancel">back</span></a>
+        </div>
+        <section id="uuiintroduction" class="hidden">
+            <div class="intro-title mb-3" data-res="introductionTitle">How it works</div>
+            <div class="row">
+                <div class="col col-right-border">
+                    <div class="col-fix-size float-right">
+                        <div class="intro-subtitle" data-res="introductionStep1">Step 1</div>
+                        <div class="intro-description" data-res="introductionStep1Desc1">Before you start</div>
+                        <div class="intro-description" data-res="introductionStep1Desc2">
+                            come closer to the camera
+                        </div>
+                        <div class="row">
+                            <div class="col m-3">
+                                <div class="center">
+                                    <div class="red center" data-res="introductionTooFarAway">Too far away!</div>
+                                    <img src="./images/toofaraway.png" />
+                                </div>
+                            </div>
+                            <div class="col m-3">
+                                <div class="center">
+                                    <div class="red center" data-res="introductionTooClose">Too close!</div>
+                                    <img src="./images/tooclose.png" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col m-3">
+                                <div class="center">
+                                    <div class="blue center" data-res="introductionPerfect">Perfect!</div>
+                                    <img src="./images/perfect.png" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="col-fix-size float-left">
+                        <div class="intro-subtitle" data-res="introductionStep2">Step 2</div>
+                        <div class="intro-description" data-res="introductionStep2Desc1">For Liveness Detection</div>
+                        <div class="intro-description" data-res="introductionStep2Desc2">
+                            nod your head slightly
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <div class="center m-3">
+                                    <video src="./video/nodyourhead.mp4" class="demo-video" autoplay playsinline loop muted oncontextmenu="return false;"></video>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col mt-3">
+                                <div class="intro-attention blue" data-res="introductionDontMoveDevice"><strong>Please don't move the device!</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3 mb-3">
+                <div class="col">
+                    <div class="center">
+                        <label class="checkbox">
+                            <input type="checkbox" class="intro-checkbox" id="introskip" value="yes"><span data-res="introductionDontShowAgain">GOT IT! Don't show the instruction again</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row center m-3">
+                <div class="col mb-5">
+                    <button onclick="showIntroduction(false)" class="button button-accept" data-res="buttonReadyToStart">I'm ready to start</button>
+                </div>
             </div>
         </section>
-        <section id="uuiwebapp" class="webapp">
-            <div id="uuiinstruction" class="instruction transparent-background"></div>
-            <canvas id="uuicanvas" class="liveview"></canvas>
-            <div id="uuimessage" class="message"></div>
-            <div id="uuihead" class="head"></div>
-            <a id="uuistart" class="startbutton" href="#"><img src="./images/play.svg" class="button-big-grow" alt="start" title="Start the recording of images" data-res="buttonStart" /></a>
+        <section id="uuiwebapp" class="hidden">
+            <div class="row">
+                <div class="col center">
+                    <div id="uuiinstruction" class="instruction transparent-background"></div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col center">
+                    <button id="uuistart" class="button" data-res="buttonStart">START</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col center m-3">
+                    <div id="uuiliveview" class="liveview">
+                        <div id="uuihead" class="head"></div>
+                        <canvas id="uuicanvas" class="canvasview"></canvas>
+                    </div>
+                    <video id="livevideo" class="live" autoplay playsinline oncontextmenu="return false;"></video>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col center">
+                    <div id="uuistatus" class="modal">
+                        <div id="uuimessage"></div>
+                        <div class="modal-footer">
+                            <button id="uuiok" class="button button-ok">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div id="uuisingleupload" class="uploadstatus-single">
                 <!-- status images for up to 4 recordings -->
                 <div id="uuiimage1" class="image">
@@ -64,10 +150,22 @@
                         <div id="uuiprogressbar4" class="progressbar"></div>
                     </div>
                 </div>
-           </div> 
+            </div>
             <div id="uuicompactupload" class="uploadstatus-compact">
                 <div id="uuiprogresscompact" class="progress-compact">
                     <div id="uuiprogressbarcompact" class="progressbar"></div>
+                </div>
+            </div>
+        </section>
+        <section id="uuisplash" class="hidden">
+            <div class="row mt-9 d-flex justify-content-center">
+                <div class="col-8">
+                    <div id="uuiprompt" class="promt">
+                        <p data-res="prompt" class="mt-9"></p>
+                        <p id="uuierror" class="alert-danger"></p>
+                        <a id="uuiskip" class="button button-info" href="" data-res="buttonContinue">Skip biometrics</a>
+                        <a id="uuimobileapp" class="button button-info" href="" data-res="buttonMobileApp">Start BioID app</a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -104,7 +202,6 @@ else {
 }
 
 $state = $_GET["state"];
-$autostart = (boolean)$_GET["autostart"];
 $trait = $_GET["trait"]; // backward compatibility (typically overwritten by $claims->traits)
 $task =  "verification";
 $autoenroll = false;
@@ -114,6 +211,7 @@ $recordings = 1;
 $threshold = $motionThreshold;
 $challenge = false;
 $challenges = "[]";
+$skipintro = strtolower($_GET["skipintro"]) == 'true' ? true : false;
 
 // parse the token ...
 $claims = json_decode(base64_decode(explode(".", $access_token)[1]));
@@ -135,14 +233,13 @@ if(!empty($claims->task)) {
 	$maxtries = $claims->task & 0x0F;
 }
 ?> 
-
     <script src="./js/jquery-3.4.1.min.js"></script>
     <script src="./js/getUserMedia.min.js"></script>
     <script src="./js/bws.capture.js"></script>
     <script src="./js/three.min.js"></script>
     <script src="./js/objLoader.min.js"></script>
 
-     <script type="text/javascript">
+    <script type="text/javascript">
       // BEGIN OF CONFIGURATION
         var token = <?php echo "\"$access_token\""; ?>;
         var returnURL = <?php echo "\"$return_url\""; ?>;
@@ -153,14 +250,14 @@ if(!empty($claims->task)) {
         var executions = <?php echo "\"$maxtries\""; ?>;
         var recordings = <?php echo "\"$recordings\""; ?>;
         var threshold = <?php echo "\"$threshold\""; ?>;
-        var autostart = <?php echo $autostart ? 'true' : 'false'; ?>;
         var challengeResponse = <?php echo $challenge ? 'true' : 'false'; ?>;
         var challenges = <?php echo $challenges; ?>;
         var maxHeight = <?php echo $maxHeight; ?>;
+		var skipIntro = <?php echo $skipintro ? 'true' : 'false'; ?>;
         // END OF CONFIGURATION
 
 
-        // BWS capture jQuery plugin
+            // BWS capture jQuery plugin
         var bwsCapture = null;
 
         // counter for current execution
@@ -178,45 +275,57 @@ if(!empty($claims->task)) {
 
         // localized messages (english defaults, might get overloaded in initialize())
         var localizedData = {
-            'titleEnrollment': 'Enrollment',
-            'titleVerification': 'Verification',
-            'titleIdentification': 'Identification',
-            'titleLiveDetection':  'Liveness Detection',
+              "titleEnrollment": "Enrollment",
+              "titleVerification": "Verification",
+              "titleIdentification": "Identification",
+              "titleLiveDetection": "Liveness Detection",
 
-            'buttonCancel.title': 'Abort and navigate back to caller',
-            'buttonMirror.title': 'Mirror the display of the captured images',
-            'buttonStart.title': 'Start the recording of images',
-            'buttonContinue.title': 'Skip biometric process',
-            'buttonContinue': 'Skip biometrics',
-            'buttonMobileApp.title': 'Continue biometric process with BioID app',
-            'buttonMobileApp': 'Start BioID app',
+              "introductionTitle": "How it works",
+              "introductionStep1": "Step 1",
+              "introductionStep1Desc1": "Before you start",
+              "introductionStep1Desc2": "come closer to the camera",
+              "introductionTooFarAway": "Too far away!",
+              "introductionTooClose": "Too close!",
+              "introductionPerfect": "Perfect!",
+              "introductionStep2": "Step 2",
+              "introductionStep2Desc1": "For Liveness Detection",
+              "introductionStep2Desc2": "nod your head slightly",
+              "introductionDontMoveDevice": "Please don't move the device!",
+              "introductionDontShowAgain": "GOT IT! Don't show the instruction again",
 
-            'prompt': 'This web page requires the HTML5 Media Capture and Streams API (getUserMedia(), as supported by the actual versions of Opera, Firefox, Chrome and Edge).<br/>You also have to grant access to your camera.',
-            'mobileapp': 'If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.',
+              "buttonCancel": "back",
+              "buttonCancel.title": "Abort and navigate back to caller",
+              "buttonReadyToStart": "I'm ready to start",
+              "buttonContinue": "Skip biometrics",
+              "buttonMobileApp": "Start BioID app",
 
-            'uploadInfo': 'Uploading...',
+              "prompt": "It seems like we don't have access to the camera. For performing biometric operations, please try the following:<br/>- Grant access to the camera.<br/>- Use a different browser (e.g. the most recent versions of Opera, Firefox, Chrome or Edge).",
+              "mobileapp": "If you have installed the BioID App on your mobile device, you can use this app for enrollment or verification.",
 
-            'capture-error': 'The user might have denied access to their camera.<br />Sorry, but without access to a camera, biometric face/periocular recognition is not possible!',
-            'nogetUserMedia': 'Your browser does not support the HTML5 Media Capture and Streams API. You might want to use the BioID mobile App instead.',
-            'permissionDenied': 'Permission Denied!',
-            'webgl-error': 'WebGL is disabled or unavailable. If possible activate WebGL or use another browser.',
+              "uploadInfo": "Uploading...",
 
-            'UserInstruction-3': '3 ...',
-            'UserInstruction-2': '2 ...',
-            'UserInstruction-1': '1 ...',
-            'UserInstruction-FollowMe': 'Follow Me',
-            'UserInstruction-NoMovement': 'Please move your head ...',
+              "capture-error": "We could not capture an image.<br />Sorry, but without access to the camera, facial recognition and liveness detection aren't possible!",
+              "nogetUserMedia": "Your browser does not support the HTML5 Media Capture and Streams API. Please use a different browser or the BioID mobile app.",
+              "permissionDenied": "Permission Denied!",
+              "webgl-error": "WebGL is disabled or unavailable. If possible activate WebGL or use another browser.",
 
-            'Perform-enrollment': 'Training ...',
-            'Perform-verification': 'Verifying ...',
-            'Perform-identification': 'Identifying ...',
-            'Perform-livenessdetection':  'Processing ...',
+              "UserInstruction-CloseUp": "Come close before you start",
+              "UserInstruction-NodYourHead": "Please nod your head",
+              "UserInstruction-FollowMe": "Follow the blue head",
+              "UserInstruction-NoMovement": "Follow the head's movement",
+              "UserInstruction-PleaseWait": "Please wait",
 
-            'NoFaceFound': 'No face found',
-            'MultipleFacesFound': 'Upload failed: multiple faces were found',
-            'LiveDetectionFailed': 'Live detection failed<br/>Retrying ...',
-            'ChallengeResponseFailed': 'Challenge-Response failed!<br/>Follow the head ...',
-            'NotRecognized': 'You have not been recognized!<br/>Retrying ...'
+              "Perform-enrollment": "Training...",
+              "Perform-verification": "Verifying...",
+              "Perform-identification": "Identifying...",
+              "Perform-livenessdetection": "Processing...",
+
+              "NoMotionDetected": "We could not detect any motion.<br/>For Liveness Detection please nod your head slightly.",
+              "NoFaceFound": "We could not find a suitable face.<br/>Come close and look straight before you start.",
+              "MultipleFacesFound": "We found multiple faces or a strongly uneven background distracted us.<br/>Your face should fill the circle completely.",
+              "LiveDetectionFailed": "Liveness Detection failed.<br/>Look straight into the camera, then nod your head slightly.<br/>Please ensure constant lighting.",
+              "ChallengeResponseFailed": "Challenge-Response failed!<br/>Slowly follow the head's movement.",
+              "NotRecognized": "You have not been recognized!<br/>Please ensure constant lighting. For improving recognition, please enroll again."
         };
 
         /* ----------------- Set button functionality ------------------------------------------*/
@@ -239,17 +348,73 @@ if(!empty($claims->task)) {
                 $('#uuimobileapp').attr('href', 'bioid-enroll://?access_token=' + token + '&return_url=' + returnURL + '&state=' + state);
             }
 
+            $('#uuiinstruction').attr('data-res', 'UserInstruction-CloseUp');
+
             // hide button after first click
             $('#uuimobileapp').click(function () {
                 $('#uuimobileapp').hide();
             });
+
+            // Check if cookie is set
+            // let skipCookie = false;
+            // var cookie = document.cookie;
+            // if (cookie != "") {
+            //    skipCookie = cookie.includes('true');
+            // }
+
+            if (skipIntro /* || skipCookie */) {
+                showIntroduction(false);
+            }
+            else {
+                showIntroduction(true);
+            }
         });
 
+        function showIntroduction(show) {
+            if (show) {
+                $('#uuiintroduction').show();
+            }
+            else {
+                $('#uuiintroduction').hide();
+                $('#uuiwepapp').show();
+                initCapture();
+
+                let checked = $('#introskip').prop("checked");
+                if (checked) {
+                    skipIntro = true;
+                    // set cookie (1 year) to skip the introduction for the next time
+                    // document.cookie = "BioIDSkipIntro=true;max-age=31536000;path=/";
+                }
+            }
+        }
+
+        function initCapture() {
+            // init BWS capture jQuery plugin (see bws.capture.js)
+            bwsCapture = bws.initcapture(document.getElementById('uuicanvas'), document.getElementById('livevideo'), token, {
+                apiurl: apiurl,
+                task: task,
+                trait: trait,
+                threshold: threshold,
+                challengeResponse: challengeResponse,
+                recordings: recordings,
+                maxheight: maxHeight
+            });
+            let success = initHead();
+            if (!success) {
+                $('#uuierror').html(formatText('webgl-error'));
+                $('#uuiskip').show();
+            }
+            else {
+                // and start everything
+                onStart();
+            }
+        }
+
         // called from Start button and onStart to initiate a new recording
-        function startRecording(countdown) {
-          $('#uuistart').hide();
+        function startRecording() {
+          $('#uuistart').attr('disabled', 'disabled');
           var tags = challengeResponse && challenges.length > currentExecution && challenges[currentExecution].length > 0 ? challenges[currentExecution] : [];
-          bwsCapture.startRecording(tags, countdown);
+          bwsCapture.startRecording(tags);
         }
 
         // called from Mirror button to mirror the captured image
@@ -320,7 +485,6 @@ if(!empty($claims->task)) {
 
             // try to get language info from the browser.
             let userLangAttribute = navigator.language || navigator.userLanguage || navigator.browserLanguage || 'en';
-            userLangAttribute = 'en';
             let userLang = userLangAttribute.slice(0, 2);
             // let userLocation = userLangAttribute.slice(-2) || 'us';
 
@@ -332,37 +496,24 @@ if(!empty($claims->task)) {
                 console.log('Loading of language-specific resource failed with: ' + textStatus + ', ' + error);
             }).always(function () {
                 localize();
-                // init BWS capture jQuery plugin (see bws.capture.js)
-                bwsCapture = bws.initcapture(document.getElementById('uuicanvas'), token, {
-                    apiurl: apiurl,
-                    task: task,
-                    trait: trait,
-                    challengeResponse: challengeResponse,
-                    recordings: recordings,
-                    threshold: threshold,
-                    maxheight: maxHeight
-                });
-                let success = initHead();
-                if (!success) {
-                    $('#uuierror').html(formatText('webgl-error'));
-                    $('#uuiskip').show();
-                }
-                else {
-                    // and start everything
-                    onStart();
-                }
             });
         }
-
 
         /* ------------------ Start BWS capture jQuery plugin -----------------------------------*/
 
         // startup code
         function onStart() {
             bwsCapture.start(function () {
-                $('#uuicanvas').show();
                 captureStarted();
+                $('#uuicanvas').show();
             }, function (error) {
+
+                // hide uuiwebapp
+                $('#uuiwebapp').hide();
+
+                // show default information about general issues
+                $('#uuisplash').show();
+
                 // show button for continue without biometrics (skip biometric task)
                 $('#uuiskip').show();
                 // show button for BioID app (interapp communication)
@@ -388,8 +539,6 @@ if(!empty($claims->task)) {
                 currentExecution++;
 
                 if (error !== undefined && retry && currentExecution < executions) {
-                    // if failed restart if retries are left, but wait a bit until the user has read the error message!
-                    setTimeout(function () { startRecording(true); }, 1800);
                     console.log('Current Execution: ' + currentExecution);
                 } else {
                     // done: redirect to caller ...
@@ -397,43 +546,49 @@ if(!empty($claims->task)) {
                     if (error !== undefined) {
                         url = url + '&error=' + error;
                     }
-                    url = url + '&state=' + state;
+                    url = url + '&state=' + state + '&skipintro=' + skipIntro;
                     window.location.replace(url);
                 }
             }, function (status, message, dataURL) {
                 let $msg;
                 if (status === 'UploadProgress') {
-                    // for single upload status
-                    let id = message.id;
-                    let modId = ((id - 1) % 4) + 1;
-                    // for compact upload status
-                    let progresscompact = 0;
-                    progressMap.set(id, message.progress);
-                    progressMap.forEach((value) => progresscompact += value);
-                    progresscompact = Math.ceil(progresscompact / recordings);
-                    if (progresscompact > 100) {
-                        progresscompact = 100;
-                    }
+                        // for single upload status
+                        let id = message.id;
+                        let modId = ((id - 1) % 4) + 1;
+                        // for compact upload status
+                        let progresscompact = 0;
+                        progressMap.set(id, message.progress);
+                        progressMap.forEach(function (value) { return progresscompact += value });
+                        progresscompact = Math.ceil(progresscompact / recordings);
+                
+                        if (progresscompact > 100) {
+                            progresscompact = 100;
+                        }
 
-                    // css media query decision
-                    if ($('#uuisingleupload').is(':visible') == true) {
-                        $('#uuiprogress' + modId).show();
-                        $('#uuiprogressbar' + modId).width(message.progress + '%');
-                        // if the window size changed
-                        $('#uuiprogresscompact').hide();
-                    }
-                    else {
-                        $('#uuiprogresscompact').show();
-                        $('#uuiprogressbarcompact').width(progresscompact + '%');
-                    }
+                        // css media query decision
+                        if ($('#uuisingleupload').is(':visible') == true) {
+                            $('#uuiprogress' + modId).show();
+                            $('#uuiprogressbar' + modId).width(message.progress + '%');
+                            // if the window size changed
+                            $('#uuiprogresscompact').hide();
+                        }
+                        else {
+                            $('#uuiprogresscompact').show();
+                            $('#uuiprogressbarcompact').width(progresscompact + '%');
+                        }
                 }
                 else if (status === 'DisplayTag') {
                     setCurrentTag(message);
                     $msg = $('#uuiinstruction');
-                    $msg.html(formatText('UserInstruction-FollowMe'));
+                    if (challengeResponse || task === 'enrollment') {
+                        $msg.html(formatText('UserInstruction-FollowMe'));
+                    }
+                    else {
+                        $msg.html(formatText('UserInstruction-NodYourHead'));
+                    }
                     $msg.stop(true).fadeIn();
                 } else {
-                    // report a message on the screen                  
+                    // report a message on the screen
                     let msg = formatText(status);
 
                     // user instructions
@@ -465,11 +620,7 @@ if(!empty($claims->task)) {
 
                     // perform tasks
                     if (status.indexOf('Perform') > -1 || status.indexOf('Retry') > -1) {
-                        // show message
-                        $msg = $('#uuimessage');
-                        $msg.html(msg);
-                        $msg.stop(true).fadeIn().delay(1800).fadeOut();
-                        // hide compact upload progress 
+                        // hide compact upload progress
                         $('#uuiprogresscompact').hide();
                     }
 
@@ -479,16 +630,14 @@ if(!empty($claims->task)) {
                         status.indexOf('NoFaceFound') > -1 ||
                         status.indexOf('MultiFacesFound') > - 1) {
 
-                        // hide head and userinstruction
-                        hideHead();
-                        $('#uuiinstruction').hide();
-                        $('#uuicanvas').css('filter', 'blur(10px)');
+                        changeLiveView(true);
 
                         // show message
+                        $('#uuiinstruction').text('');
+                        $('#uuistatus').show();
                         $msg = $('#uuimessage');
-                        $msg.html(msg);
-                        $msg.stop(true).fadeIn().delay(1800).fadeOut();
-                        setTimeout(function () { $('#uuicanvas').css('filter', ''); }, 1900);
+                        $msg.html(formatText(msg));
+                        $msg.stop(true).fadeIn();
                     }
 
                     // display some animations/images depending on the status
@@ -506,18 +655,13 @@ if(!empty($claims->task)) {
 
                         // if uuiuploaded is not visible -> mobile view
                         if (recording >= recordings) {
-                            hideHead();
-                            $('#uuiinstruction').hide();
-                            $('#uuicanvas').css('filter', 'blur(10px)');
-
-                            $msg = $('#uuimessage');
-                            $msg.html(formatText('uploadInfo'));
-                            $msg.stop(true).fadeIn();
+                            $('#uuiinstruction').html(formatText('UserInstruction-PleaseWait'));
+                            changeLiveView(true);
                         }
                     } else if (status === 'Uploaded') {
                         // successfull upload (we should have a dataURL)
                         if (dataURL) {
-                            $('#uuiupload' + modUploaded).hide();                       
+                            $('#uuiupload' + modUploaded).hide();
                             $('#uuiprogress' + modUploaded).hide();
                             let $image = $('#uuiuploaded' + modUploaded);
                             $image.attr('src', dataURL);
@@ -534,9 +678,22 @@ if(!empty($claims->task)) {
             });
         }
 
+        // switch between liveview and displayed messages
+        function changeLiveView(blur) {
+            if (blur) {
+                // hide head and blur canvas
+                hideHead();
+                $('#uuicanvas').css('filter', 'blur(10px)');
+                $('#uuiprogresscompact').hide();
+            }
+            else {
+                $('#uuicanvas').css('filter', 'none');
+                showHead();
+            }
+        }
+
         // called by onStart to update GUI
         function captureStarted() {
-            $('#uuisplash').hide();
             $('#uuiwebapp').show();
             $('#uuimessage').show();
             $('#uuiinstruction').show();
@@ -544,20 +701,26 @@ if(!empty($claims->task)) {
             // Currently not neccessary - therefore the button is not shown!
             // $('#uuimirror').show().click(mirror);
 
-            if (autostart) {
-              setTimeout(function () { startRecording(true); }, 1000);
-            }
-            else {
-              $('#uuistart').show().click(function () { startRecording(task === 'enrollment'); });
-            }
+            $('#uuistart').show().click(function () { startRecording(task === 'enrollment'); });
+
+
+            $('#uuiok').show().click(function () {
+                $('#uuistatus').hide();
+                $('#uuistart').prop('disabled', false);
+                $('#uuiinstruction').html(formatText('UserInstruction-CloseUp'));
+                changeLiveView(false);
+            });
+
+            setTimeout(function () { console.log('triggered showHead'); showHead(); }, 50);
+
         }
 
         // called from onStart when recording is done
         function stopRecording() {
-            $('#uuiinstruction').hide();
             hideHead();
 
             bwsCapture.stopRecording();
+
             for (let i = 1; i <= 4; i++) {
                 $('#uuiimage' + i).hide();
             }
@@ -565,10 +728,10 @@ if(!empty($claims->task)) {
 
         /* -------------------- Displaying head ---------------------------------------------------*/
 
-        var camera, scene, renderer;
+        var camera, scene, renderer, id;
         var startTime;
         var resetHead = false;
-        const maxVertical = 0.25;
+        const maxVertical = 0.20;
         const maxHorizontal = 0.25;
 
         function initHead() {
@@ -586,11 +749,11 @@ if(!empty($claims->task)) {
             let width = $('#uuihead').width();
             let height = $('#uuihead').height();
             let uuihead = $('#uuihead');
-            $('#uuiwebapp').append(uuihead);
+            $('#uuiliveview').append(uuihead);
 
             // camera
             camera = new THREE.PerspectiveCamera(20, width / height, 1, 1000);
-            camera.position.set(0, 0, 5);
+            camera.position.set(0, 0, 5.5);
 
             // scene
             scene = new THREE.Scene();
@@ -615,7 +778,7 @@ if(!empty($claims->task)) {
             };
             let onError = function (xhr) {};
             let loader = new THREE.OBJLoader(manager);
-            let material = new THREE.MeshLambertMaterial({ transparent: false, opacity: 0.6 });
+            let material = new THREE.MeshLambertMaterial({ transparent: false, opacity: 0.8 });
 
             loader.load('/bws/model/head.obj', function (head) {
                 head.traverse(function (child) {
@@ -633,38 +796,23 @@ if(!empty($claims->task)) {
             renderer.setSize(width, height);
 
             container.appendChild(renderer.domElement);
-            window.addEventListener('resize', onHeadResize, false);
+            document.addEventListener('uuiresize', onHeadResize, false);
 
             return true;
         }
 
         function onHeadResize() {
-            let width = 0;
-            let height = 0;
+          
+            let canvasWidth = parseInt($('#uuicanvas').width());
+            let canvasHeight = parseInt($('#uuicanvas').height());
 
-            let canvasWidth = $('#uuicanvas').width();
-            let canvasHeight = $('#uuicanvas').height();
-
-            if (canvasWidth > canvasHeight) {
-                height = canvasHeight - canvasHeight/3;
-                width = height * 3 / 4;
-            }
-            else {
-                width = canvasWidth - canvasWidth / 3;
-                height = width * 4 / 3;
-            }
-         
-            // Avoid floating for canvas size (performance issue)
-            width = Math.floor(width);
-            height = Math.floor(height);
-
-            $('#uuihead').css({'margin-top': Math.floor(-height/2), 'margin-left': Math.floor(-width/2) });
-            $('#uuihead').attr('width', width);
-            $('#uuihead').attr('height', height);
-
-            camera.aspect = width / height;
+            $('#uuihead').css({ 'margin-top': -canvasHeight, 'margin-left': '0' });
+            $('#uuihead').attr('width', canvasWidth);
+            $('#uuihead').attr('height', canvasHeight + 50);
+			
+            camera.aspect = canvasWidth / canvasHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
+            renderer.setSize(canvasWidth, canvasHeight);
             renderer.render(scene, camera);
         }
 
@@ -672,18 +820,61 @@ if(!empty($claims->task)) {
             currentTag = '';
             parentTag = '';
             resetHead = true;
+            cancelAnimationFrame(id);
+            $('.head').css('opacity', '0.6');
         }
 
         function setCurrentTag(tag) {
             if (currentTag !== '') {
                 parentTag = currentTag;
             }
-           
+
             currentTag = tag;
             startTime = new Date().getTime();
 
-            animateHead();
-            console.log('DisplayTag: ' + tag);
+            if (currentTag === 'any' && task !== 'enrollment') {
+                constantAnimation();
+            }
+            else {
+                animateHead();
+                console.log('DisplayTag: ' + tag);
+            }
+        }
+
+        function constantAnimation() {
+            // change css class 'head'
+            $('.head').css('opacity', '0.8');
+
+            // animation time
+            let delta = 0.005;
+            let head = scene.getObjectByName('BioIDHead');
+            showHead();
+
+            let direction = 'down';
+            var animate = function () {
+
+                if (direction === 'up') {
+                    if (head.rotation.x >= -maxVertical) {
+                        head.rotation.x -= delta;
+                    }
+                    else {
+                        direction = 'down';
+                    }
+                }
+
+                if (direction === 'down') {
+                    if (head.rotation.x <= maxVertical) {
+                        head.rotation.x += delta;
+                    }
+                    else {
+                        direction = 'up';
+                    }
+                }
+
+                id = requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            };
+            animate();
         }
 
         function animateHead() {
@@ -703,6 +894,8 @@ if(!empty($claims->task)) {
                     head.rotation.y = 0;
                     resetHead = false;
                     doAnimation = true;
+                    // change css class 'head'
+                    $('.head').css('opacity', '0.8');
                     showHead();
                 }
                 else {
@@ -713,7 +906,14 @@ if(!empty($claims->task)) {
                             currentTag = enrollmentTags[recording];
                         }
                         else {
-                            currentTag = predefinedTags[Math.floor(Math.random() * Math.floor(4))];
+                            if (head.rotation.x >= -maxVertical && head.rotation.x <= 0) {
+                                head.rotation.x -= delta;
+                                doAnimation = true;
+                            }
+                            else {
+                                head.rotation.x += delta;
+                                doAnimation = true;
+                            }
                         }
                     }
 
@@ -780,19 +980,23 @@ if(!empty($claims->task)) {
                 }
 
                 if (doAnimation) {
-                    requestAnimationFrame(animateHead);
+                    id = requestAnimationFrame(animateHead);
                 }
                 renderer.render(scene, camera);
             }
         }
 
         function showHead() {
-            onHeadResize();
+
             $('#uuihead').show();
+            onHeadResize();
+            console.log('showHead')
         }
 
         function hideHead() {
             $('#uuihead').hide();
+            resetHeadDisplay();
+            console.log('hideHead');
         }
 
     </script>

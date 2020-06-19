@@ -1,9 +1,11 @@
 ﻿// mediaDevices - getUserMedia - polyfill
 // usage: navigator.mediaDevices.getUserMedia({ video: true }).then(function (mediaStream) { ... }).catch(function (err) { ... });
+'use strict';
+
 (function () {
-    var promisifiedOldGUM = function (constraints, successCallback, errorCallback) {
+    var promisifiedOldGUM = function promisifiedOldGUM(constraints, successCallback, errorCallback) {
         // First get ahold of getUserMedia, if present
-        var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+        var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
         // Some browsers just don't implement it - return a rejected promise with an error to keep a consistent interface
         if (!getUserMedia) {
             return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
@@ -12,7 +14,7 @@
         return new Promise(function (successCallback, errorCallback) {
             getUserMedia.call(navigator, constraints, successCallback, errorCallback);
         });
-    }
+    };
 
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {

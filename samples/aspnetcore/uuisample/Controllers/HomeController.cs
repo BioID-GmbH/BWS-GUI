@@ -46,6 +46,8 @@ namespace uuisample.Controllers
 
             try
             {
+                bool skipIntro = false;
+
                 // well lets start by fetching a BWS token
                 using (var httpClient = new HttpClient())
                 {
@@ -105,7 +107,7 @@ namespace uuisample.Controllers
                         State = "encrypted_app_status",
                         Trait = model.Face ? (model.Periocular ? "Face,Periocular" : "Face") : "Periocular",
                         AutoEnroll = (taskFlags & TokenTask.AutoEnroll) == TokenTask.AutoEnroll,
-                        AutoStart = false
+                        SkipIntro = skipIntro
                     });
                 }
             }
@@ -115,7 +117,7 @@ namespace uuisample.Controllers
             }
         }
         
-        public async Task<ActionResult> UuiCallback(string access_token, string state, string error)
+        public async Task<ActionResult> UuiCallback(string access_token, string state, string error, bool skipintro)
         {
             if(string.IsNullOrEmpty(state) || string.IsNullOrEmpty(access_token))
             {
@@ -223,7 +225,7 @@ namespace uuisample.Controllers
             public bool ChallengeResponse { get; set; }
             public string ChallengesJson { get; set; }
             public bool AutoEnroll { get; set; }
-            public bool AutoStart { get; set; }
+            public bool SkipIntro { get; set; }
         }
 
         // Flags as used in the BWS token to identify the tasks that need to be performed with this token.
