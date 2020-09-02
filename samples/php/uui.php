@@ -205,7 +205,6 @@ $state = $_GET["state"];
 $trait = $_GET["trait"]; // backward compatibility (typically overwritten by $claims->traits)
 $task =  "verification";
 $autoenroll = false;
-$maxHeight = 320;
 $maxtries = 3;
 $recordings = 1;
 $threshold = $motionThreshold;
@@ -223,8 +222,8 @@ if(!empty($claims->traits)) {
 if(!empty($claims->task)) {
 	if(($claims->task & 0x100) == 0x100) { $recordings = 2; }
 	if(($claims->task & 0x10) == 0x10) { $task = "identification"; }
-	elseif(($claims->task & 0x20) == 0x20) { $task = "enrollment"; $maxHeight = 480; $recordings = 3; }
-	elseif(($claims->task & 0x1000) == 0x1000) { $autoenroll = true; $maxHeight = 480; }
+	elseif(($claims->task & 0x20) == 0x20) { $task = "enrollment"; $recordings = 3; }
+	elseif(($claims->task & 0x1000) == 0x1000) { $autoenroll = true; }
 	if(($claims->task & 0x200) == 0x200) { 
 		$challenge = true;
 		$challenges = $claims->challenge;
@@ -252,7 +251,6 @@ if(!empty($claims->task)) {
         var threshold = <?php echo "\"$threshold\""; ?>;
         var challengeResponse = <?php echo $challenge ? 'true' : 'false'; ?>;
         var challenges = <?php echo $challenges; ?>;
-        var maxHeight = <?php echo $maxHeight; ?>;
 		var skipIntro = <?php echo $skipintro ? 'true' : 'false'; ?>;
         // END OF CONFIGURATION
 
@@ -383,7 +381,7 @@ if(!empty($claims->task)) {
                 if (checked) {
                     skipIntro = true;
                     // set cookie (1 year) to skip the introduction for the next time
-                    // document.cookie = "BioIDSkipIntro=true;max-age=31536000;path=/";
+                    // document.cookie = "BioIDSkipIntro=true;max-age=31536000;path=/;secure;SameSite=Strict";
                 }
             }
         }
@@ -396,8 +394,7 @@ if(!empty($claims->task)) {
                 trait: trait,
                 threshold: threshold,
                 challengeResponse: challengeResponse,
-                recordings: recordings,
-                maxheight: maxHeight
+                recordings: recordings
             });
             let success = initHead();
             if (!success) {

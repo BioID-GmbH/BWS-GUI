@@ -1,5 +1,5 @@
-﻿/*! BioID Web Service - 2020-03-10
-*   image capture and recognition library - v3.0.0
+﻿/*! BioID Web Service - 2020-09-01
+*   image capture and recognition library - v3.0.1
 *   https://www.bioid.com
 *   Copyright (C) BioID GmbH.
 */
@@ -15,7 +15,6 @@
             apiurl: 'https://bws.bioid.com/extension/',
             task: 'verification', // | identification | enrollment | livenessdetection
             trait: 'FACE',
-            maxheight: 480,
             recordings: 2,
             maxupload: 20,
             challengeResponse: false,
@@ -82,7 +81,9 @@
                 return;
             }
 
-            var constraints = { audio: false, video: { facingMode: "user" } };
+            var constraints = {
+                audio: false, video: { facingMode: "user", height: { min: 480 } }
+            };
             navigator.mediaDevices.getUserMedia(constraints)
                 .then(function (mediaStream) {
                     console.log('Video capture stream has been created with constraints:', constraints);
@@ -135,7 +136,7 @@
 
             // we prefer 3 : 4 face image resolution
             let aspectratio = video.videoWidth / video.videoHeight < 3 / 4 ? video.videoWidth / video.videoHeight : 3 / 4;
-            copycanvas.height = video.videoHeight > settings.maxheight ? settings.maxheight : video.videoHeight;
+            copycanvas.height = video.videoHeight;
             copycanvas.width = copycanvas.height * aspectratio;
             motioncanvas.height = settings.motionareaheight;
             motioncanvas.width = motioncanvas.height * aspectratio;
@@ -177,10 +178,10 @@
             // at first we need aspectration of the video - portrait or landscape size
             let aspectrationvideo = video.videoWidth / video.videoHeight;
             let offset = 0;
-            
+
             if (aspectrationvideo > 1) { // e.g 640x480
                 if (window.innerWidth / window.innerHeight > 1) {
-                    canvas.height = window.innerHeight/3*1.7;
+                    canvas.height = window.innerHeight / 3 * 1.7;
                     canvas.width = canvas.height / aspectratio;
                 }
                 else {
@@ -193,9 +194,9 @@
                 canvas.width = window.innerWidth - 20;
                 canvas.height = canvas.width / aspectrationvideo;
             }
-           
+
             draw.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
+
             // Drawing default white background e.g. Safari does not support canvas filter 'blur'!
             w = canvas.height * aspectratio - offset;
             let gradient = draw.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, w * 0.5);
@@ -204,7 +205,7 @@
             draw.fillStyle = gradient;
             draw.setTransform(1, 0, 0, 1, 0, 0);
             draw.fillRect(0, 0, canvas.width, canvas.height);
-           
+
             // Drawing white circle into liveview
             draw.filter = 'none';
 
@@ -222,7 +223,7 @@
             // fire event for uuicanvas size change
             var event = new Event('uuiresize');
             document.dispatchEvent(event);
-         
+
             if (capturing && uploaded < settings.recordings) {
                 // we may need to switch on the tags again ??????
                 //if (settings.challengeResponse && tag === 'any') { setTag(); }
@@ -334,8 +335,8 @@
                         }
                     } else {
                         console.log('upload error', data.Error);
-                        if (statusCallback) { statusCallback(data.Error); } 
-                        
+                        if (statusCallback) { statusCallback(data.Error); }
+
                         if (uploaded < 1) {
                             // restart process (retry)
                             doneCallback('NoFaceFound', true);
@@ -346,7 +347,7 @@
                             capturing = false;
                             performTask();
                         }
-                    }   
+                    }
                 }).fail(function (jqXHR, textStatus, errorThrown) {
                     // ups, call failed, typically due to
                     // Unauthorized (invalid token) or

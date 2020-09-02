@@ -198,7 +198,6 @@
         var threshold = @Model.MotionThreshold;
         var challengeResponse = @(Model.ChallengeResponse ? "true" : "false");
         var challenges = @Html.Raw(Model.ChallengesJson);
-        var maxHeight = task === 'enrollment' ? 480 : @(Model.AutoEnroll ? 480 : 320);
         var skipIntro = @(Model.SkipIntro ? "true" : "false");
         // END OF CONFIGURATION
 
@@ -329,7 +328,7 @@
                 if (checked) {
                     skipIntro = true;
                     // set cookie (1 year) to skip the introduction for the next time
-                    document.cookie = "BioIDSkipIntro=true;max-age=31536000;path=/";
+                    document.cookie = "BioIDSkipIntro=true;max-age=31536000;path=/;secure;SameSite=Strict";
                 }
             }
         }
@@ -342,8 +341,7 @@
                 trait: trait,
                 threshold: threshold,
                 challengeResponse: challengeResponse,
-                recordings: recordings,
-                maxheight: maxHeight
+                recordings: recordings
             });
             let success = initHead();
             if (!success) {
