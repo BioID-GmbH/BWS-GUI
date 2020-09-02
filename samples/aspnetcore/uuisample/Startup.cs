@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System.Linq;
 
 namespace uuisample
@@ -22,7 +22,7 @@ namespace uuisample
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc();
 
             services.AddResponseCompression(options =>
             {
@@ -38,7 +38,7 @@ namespace uuisample
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -61,11 +61,13 @@ namespace uuisample
                 ContentTypeProvider = provider
             });
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
             });
         }
     }

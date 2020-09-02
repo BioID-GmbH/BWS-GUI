@@ -16,21 +16,21 @@ namespace uuisample.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly IWebHostEnvironment _env;
 
         // TODO: fill in your BWS Application-ID and -secret:
         const string _appID = "your-BWS-appID";
         const string _appSecret = "your-BWS-appSecret";
 
-        public HomeController(IHostingEnvironment hostingEnvironment)
+        public HomeController(IWebHostEnvironment env)
         {
-            _hostingEnvironment = hostingEnvironment;
+            _env = env;
         }
 
         public IActionResult Index()
         {
             // This is only necessary to check if the uui folder is on the right place!
-            if (!System.IO.File.Exists(Path.Combine(_hostingEnvironment.WebRootPath, "uui/css/uui.css")))
+            if (!System.IO.File.Exists(Path.Combine(_env.WebRootPath, "uui/css/uui.css")))
                 throw new FileNotFoundException("Please copy the complete 'uui' folder into the 'wwwroot' directory!");
 
             return View();
@@ -49,67 +49,65 @@ namespace uuisample.Controllers
                 bool skipIntro = false;
 
                 // well lets start by fetching a BWS token
-                using (var httpClient = new HttpClient())
+                using var httpClient = new HttpClient();
+                string credentials = Convert.ToBase64String(Encoding.GetEncoding("iso-8859-1").GetBytes($"{_appID}:{_appSecret}"));
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
+                string query = $"token?id={_appID}&bcid={model.BCID}&task={model.Operation}&livedetection=true&challenge={model.ChallengeResponse}&autoenroll={model.AutoEnroll}";
+
+                if (!model.ApiUrl.EndsWith("/")) model.ApiUrl += "/";
+                var uri = new Uri(new Uri(model.ApiUrl), query);
+
+                var response = await httpClient.GetAsync(uri);
+                if (!response.IsSuccessStatusCode)
                 {
-                    string credentials = Convert.ToBase64String(Encoding.GetEncoding("iso-8859-1").GetBytes($"{_appID}:{_appSecret}"));
-                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-                    string query = $"token?id={_appID}&bcid={model.BCID}&task={model.Operation}&livedetection=true&challenge={model.ChallengeResponse}&autoenroll={model.AutoEnroll}";
+                    return View("Index", new MessageViewModel { Theme = "danger", Heading = "Call to UUI failed!", Text = response.Content.ReadAsStringAsync().Result });
+                }
 
-                    if (!model.ApiUrl.EndsWith("/")) model.ApiUrl += "/";
-                    var uri = new Uri(new Uri(model.ApiUrl), query);
+                // lets read the token
+                string access_token = await response.Content.ReadAsStringAsync();
 
-                    var response = await httpClient.GetAsync(uri);
-                    if (!response.IsSuccessStatusCode)
+                // parse the token to find settings for the user interface
+                string claimstring = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(access_token.Split('.')[1]));
+                var claims = JObject.Parse(claimstring);
+                TokenTask taskFlags = (TokenTask)claims["task"].Value<int>();
+
+                int recordings = (taskFlags & TokenTask.LiveDetection) == TokenTask.LiveDetection ? (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? 4 : 2 : 1;
+                string challengesJson = "[]";
+                if ((taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse)
+                {
+                    recordings = 4;
+                    string challenges = (string)claims["challenge"];
+                    if (!string.IsNullOrEmpty(challenges))
                     {
-                        return View("Index", new MessageViewModel { Theme = "danger", Heading = "Call to UUI failed!", Text = response.Content.ReadAsStringAsync().Result });
-                    }
-
-                    // lets read the token
-                    string access_token = await response.Content.ReadAsStringAsync();
-
-                    // parse the token to find settings for the user interface
-                    string claimstring = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(access_token.Split('.')[1]));
-                    var claims = JObject.Parse(claimstring);
-                    TokenTask taskFlags = (TokenTask)claims["task"].Value<int>();
-
-                    int recordings = (taskFlags & TokenTask.LiveDetection) == TokenTask.LiveDetection ? (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? 4 : 2 : 1;
-                    string challengesJson = "[]";
-                    if ((taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse)
-                    {
-                        recordings = 4;
-                        string challenges = (string)claims["challenge"];
-                        if (!string.IsNullOrEmpty(challenges))
+                        challengesJson = challenges;
+                        string[][] challengeSequences = JsonConvert.DeserializeObject<string[][]>(challenges);
+                        if (challengeSequences.Length > 0 && challengeSequences[0].Length > 0)
                         {
-                            challengesJson = challenges;
-                            string[][] challengeSequences = JsonConvert.DeserializeObject<string[][]>(challenges);
-                            if (challengeSequences.Length > 0 && challengeSequences[0].Length > 0)
-                            {
-                                recordings = challengeSequences[0].Length + 1;
-                            }
+                            recordings = challengeSequences[0].Length + 1;
                         }
                     }
-
-                    // render the BWS unified user interface
-                    return View("uui", new UuiViewModel
-                    {
-                        Task = (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? "enrollment" :
-                            (taskFlags & TokenTask.Identify) == TokenTask.Identify ? "identification" :
-                            (taskFlags & TokenTask.LiveOnly) == TokenTask.LiveOnly ? "livenessdetection" :
-                            "verification",
-                        MaxTries = (int)(taskFlags & TokenTask.MaxTriesMask),
-                        Recordings = recordings,
-                        MotionThreshold = MobileDevice.IsMobileDevice(Request) ? Constants.MotionThresholdMobile : Constants.MotionThreshold,
-                        ChallengeResponse = (taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse,
-                        ChallengesJson = challengesJson,
-                        Token = access_token,
-                        ApiUrl = model.ApiUrl,
-                        ReturnUrl = $"{Request.Scheme}://{Request.Host}/home/uuicallback",
-                        State = "encrypted_app_status",
-                        Trait = model.Face ? (model.Periocular ? "Face,Periocular" : "Face") : "Periocular",
-                        AutoEnroll = (taskFlags & TokenTask.AutoEnroll) == TokenTask.AutoEnroll,
-                        SkipIntro = skipIntro
-                    });
                 }
+
+                // render the BWS unified user interface
+                return View("uui", new UuiViewModel
+                {
+                    Task = (taskFlags & TokenTask.Enroll) == TokenTask.Enroll ? "enrollment" :
+                        (taskFlags & TokenTask.Identify) == TokenTask.Identify ? "identification" :
+                        (taskFlags & TokenTask.LiveOnly) == TokenTask.LiveOnly ? "livenessdetection" :
+                        "verification",
+                    MaxTries = (int)(taskFlags & TokenTask.MaxTriesMask),
+                    Recordings = recordings,
+                    MotionThreshold = MobileDevice.IsMobileDevice(Request) ? Constants.MotionThresholdMobile : Constants.MotionThreshold,
+                    ChallengeResponse = (taskFlags & TokenTask.ChallengeResponse) == TokenTask.ChallengeResponse,
+                    ChallengesJson = challengesJson,
+                    Token = access_token,
+                    ApiUrl = model.ApiUrl,
+                    ReturnUrl = $"{Request.Scheme}://{Request.Host}/home/uuicallback",
+                    State = "encrypted_app_status",
+                    Trait = model.Face ? (model.Periocular ? "Face,Periocular" : "Face") : "Periocular",
+                    AutoEnroll = (taskFlags & TokenTask.AutoEnroll) == TokenTask.AutoEnroll,
+                    SkipIntro = skipIntro
+                });
             }
             catch (Exception ex)
             {
