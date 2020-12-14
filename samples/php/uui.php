@@ -222,6 +222,7 @@ if(!empty($claims->traits)) {
 if(!empty($claims->task)) {
 	if(($claims->task & 0x100) == 0x100) { $recordings = 2; }
 	if(($claims->task & 0x10) == 0x10) { $task = "identification"; }
+	elseif(($claims->task & 0x80) == 0x80)  { $task = "livenessdetection"; }
 	elseif(($claims->task & 0x20) == 0x20) { $task = "enrollment"; $recordings = 3; }
 	elseif(($claims->task & 0x1000) == 0x1000) { $autoenroll = true; }
 	if(($claims->task & 0x200) == 0x200) { 
