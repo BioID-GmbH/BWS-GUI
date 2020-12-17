@@ -626,7 +626,7 @@ if(!empty($claims->task)) {
                     if (status.indexOf('Failed') > -1 ||
                         status.indexOf('NotRecognized') > -1 ||
                         status.indexOf('NoFaceFound') > -1 ||
-                        status.indexOf('MultiFacesFound') > - 1) {
+                        status.indexOf('MultipleFacesFound') > - 1) {
 
                         changeLiveView(true);
 
