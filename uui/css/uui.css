@@ -273,7 +273,7 @@ body {
 }
 
 .red {
-    color: red;
+    color: #dc3545;
     font-weight: 600;
 }
 
@@ -291,7 +291,7 @@ body {
     border-radius: 12px;
     padding: 10px 32px;
     color: white;
-    background-color: #93D50B;
+    background-color: #58b999;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -302,16 +302,12 @@ body {
 }
 
 .button:hover {
-    background-color: #82BA0B;
+    background-color: #46967d;
 }
 
 .button:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(127, 186, 6, 0.5);
-}
-
-.button:hover {
-    background-color: #82BA0B;
+    box-shadow: 0 0 0 0.2rem rgba(165, 206, 192, 1);
 }
 
 .button:disabled {
@@ -354,11 +350,11 @@ body {
 
 .button-info:focus {
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(60, 176, 253, 0.5);
+    box-shadow: 0 0 0 0.2rem rgba(165, 206, 192, 0.5);
 }
 
 a .button-back {
-    width: 25px;
+    width: 18px;
     height: auto;
     vertical-align: middle;
 }
@@ -431,7 +427,7 @@ a .button-back {
     transform: translate(-50%, -50%);
     font-size: 1.3rem;
     background-color: #FFFFFF;
-    color: #BE0000;
+    color: #dc3545;
     padding: 50px;
     opacity: 0.8;
 }
