@@ -13,9 +13,19 @@ The **uui** folder contains the basics you typically need to run a biometric tas
 A complete sample is provided in the **samples** folder, there is a Visual Studio ASP.NET Core project in the `aspnetcore` subfolder. 
 For PHP only the uui.php file is available! You must request a BWS token from your server before you can call this Unified User Interface (UUI). Please take a look at the [developer documentation][docs] that helps you to integrate our APIs with REST or SOAP protocol.
 
-To successfully run one of the sample web apps, you need to have access to an existing BWS installation. If you don't have this access you can [register for a BWS trial instance][trial] - requires login.
+# Before you start developing a BioID app - you must have the following credentials
+- You need a [BioID Account][bioidaccountregister] with a **confirmed** email address.
+- After creating the BioID Account you can request a free [trial instance][trial] for the BioID Web Service (BWS).
+- After the confirmation for access to a trial instance you can login to the [BWS Portal][bwsportal].
+- The BWS Portal shows you the activity for your installation and allows you to configure your test client.
+- After login to the BWS Portal configure your test client. This client is already created for you. In order to access this client, please do the steps below.
+- Click on your client, then click on Configuration on the left side.
+- On the right side you see the section _Web API Keys_. Now create a new WEP API key for your client implementation by clicking the 'Plus' symbol.
+- You will need the _AppId_ and _AppSecret_ for your client implementation. 
+> :warning: _Please note that we only store a hash of the secret i.e the secret value cannot be reconstructed! So you should copy the value of the secret immediately!_
 
-You can also try this BWS user interface via our [Playgound website][playground] - requires login.
+
+You can also try this BWS user interface via our [Playgound website][playground].
 
 BioID offers a strong liveness detection API which is independent from special sensors like 3D cameras. It simply analyzes two selfies to determine whether or not these were taken from a real person or a fake. Most notably, it reliably blocks photo and video replay attacks as well as 3D masks by combining motion and texture based analysis with artificial intelligence (DCNNs).
 
@@ -28,5 +38,7 @@ You can find some more information about our [face recognition][bioid] technolog
 [bioid]: https://www.bioid.com "BioID GmbH Homepage"
 [docs]: https://developer.bioid.com/bwsreference "BWS documentation"
 [playground]: https://playground.bioid.com "BioID Playground"
+[bioidaccountregister]: https://account.bioid.com/Account/Register "Register a BioID account" 
 [trial]: https://bwsportal.bioid.com/register "Register for a trial instance"
+[bwsportal]: https://bwsportal.bioid.com "BWS Portal"
 [liveness]: https://www.bioid.com/liveness-detection/ "liveness detection"
