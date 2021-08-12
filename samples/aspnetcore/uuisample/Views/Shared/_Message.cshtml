@@ -9,9 +9,7 @@
             }
             @if (Model.Dismissable)
             {
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             }
             @if (!string.IsNullOrEmpty(Model.Text))
             {
@@ -29,7 +27,7 @@
             @if (!string.IsNullOrEmpty(Model.Xml))
             {
                 <div id="heading_xml">
-                    <a class="collapsed" data-toggle="collapse" href="#collapse_xml" aria-expanded="false" aria-controls="collapse_xml">
+                    <a class="collapsed" data-bs-toggle="collapse" href="#collapse_xml" aria-expanded="false" aria-controls="collapse_xml">
                         <i class="fa"></i> XML result message
                     </a>
                 </div>

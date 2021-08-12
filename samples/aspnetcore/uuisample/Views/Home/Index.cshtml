@@ -39,32 +39,32 @@
                                 <div class="custom-control custom-radio my-1">
                                     <input type="radio" class="custom-control-input" name="operation" id="enrollment" value="enroll">
                                     <label class="custom-control-label" for="enrollment">Enrollment</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Biometric enrollment" data-html="false"
-                                       data-content="Before anything else you first have to enroll, i.e. you have to record images of your face (or a repetition of an utterance) and use these recordings to create your biometric template.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Biometric enrollment"
+                                       data-bs-content="Before anything else you first have to enroll, i.e. you have to record images of your face (or a repetition of an utterance) and use these recordings to create your biometric template.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-radio my-1">
                                     <input type="radio" class="custom-control-input" name="operation" id="verification" value="verify" checked>
                                     <label class="custom-control-label" for="verification">Verification</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Biometric verification" data-html="false"
-                                       data-content="For verification you upload one or more face images. Our service compares features of the samples with your biometric template to recognize you. You must be enrolled first – otherwise you'll encounter an error message.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Biometric verification"
+                                       data-bs-content="For verification you upload one or more face images. Our service compares features of the samples with your biometric template to recognize you. You must be enrolled first – otherwise you'll encounter an error message.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-radio my-1">
                                     <input type="radio" class="custom-control-input" name="operation" id="identification" value="identify">
                                     <label class="custom-control-label" for="identification">Identification</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Biometric identification" data-html="false"
-                                       data-content="For identification, all uploaded face images are compared with all biometric templates enrolled into the system. Results should list your BioID profile first. You must be enrolled first – otherwise you can't be recognized.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Biometric identification"
+                                       data-bs-content="For identification, all uploaded face images are compared with all biometric templates enrolled into the system. Results should list your BioID profile first. You must be enrolled first – otherwise you can't be recognized.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-radio my-1">
                                     <input type="radio" class="custom-control-input" name="operation" id="livenessdetection" value="livenessdetection">
                                     <label class="custom-control-label" for="livenessdetection">Liveness Detection only</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Liveness Detection" data-html="false"
-                                       data-content="In this mode you do not perform any additional biometric operation other than face and/or periocular liveness detection. Optionally you can enable challenge-response to enhcance the reliability of the liveness detection.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Liveness Detection" 
+                                       data-bs-content="In this mode you do not perform any additional biometric operation other than face and/or periocular liveness detection. Optionally you can enable challenge-response to enhcance the reliability of the liveness detection.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
@@ -74,32 +74,32 @@
                                 <div class="custom-control custom-checkbox my-1">
                                     <input type="checkbox" class="custom-control-input" name="Face" id="facetrait" value="true" checked>
                                     <label class="custom-control-label" for="facetrait">Use face trait</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Multimodal biometrics" data-html="false"
-                                       data-content="Perform the biometric operation with the selected traits. Multimodal biometrics, i.e. using more than one trait, increases security and accuracy. At least 'Face' or 'Periocular' need to be selected! ('Voice' is not yet supported as the BioID unified user interface is not yet capable of recording voice data.)">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Multimodal biometrics"
+                                       data-bs-content="Perform the biometric operation with the selected traits. Multimodal biometrics, i.e. using more than one trait, increases security and accuracy. At least 'Face' or 'Periocular' need to be selected! ('Voice' is not yet supported as the BioID unified user interface is not yet capable of recording voice data.)">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-checkbox my-1">
                                     <input type="checkbox" class="custom-control-input" name="Periocular" id="perioculartrait" value="true" checked>
                                     <label class="custom-control-label" for="perioculartrait">Use periocular trait</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Eye biometrics" data-html="false"
-                                       data-content="The periocular trait differs from the face trait in that it looks only at the fine features around around the eye, such as lashes, lid, brow, and folds in the skin, as well as full or partial iris (the complex patterns on the colored part of the eye). Unlike face, the mouth and nose do not need to be visible, so it is ideal for applications where the face is partially covered by a medical mask, scarf or veil.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Eye biometrics"
+                                       data-bs-content="The periocular trait differs from the face trait in that it looks only at the fine features around around the eye, such as lashes, lid, brow, and folds in the skin, as well as full or partial iris (the complex patterns on the colored part of the eye). Unlike face, the mouth and nose do not need to be visible, so it is ideal for applications where the face is partially covered by a medical mask, scarf or veil.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-checkbox my-1">
                                     <input type="checkbox" class="custom-control-input" name="ChallengeResponse" id="ChallengeResponse" value="true">
                                     <label class="custom-control-label" for="ChallengeResponse">Enable challenge-response</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Enhanced liveness detection" data-html="false"
-                                       data-content="By default, using sophisticated motion analysis our patented liveness detection always checks to make sure that the images used to verify your face are from a live person rather than a photo. Challenge-response takes this a step further. If it is enabled, you are asked to turn your head in a specific direction (the 'challenge'). We then verify that you truly did turn as instructed (the 'response'). In this way we can detect and block attacks using video of you.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Enhanced liveness detection"
+                                       data-bs-content="By default, using sophisticated motion analysis our patented liveness detection always checks to make sure that the images used to verify your face are from a live person rather than a photo. Challenge-response takes this a step further. If it is enabled, you are asked to turn your head in a specific direction (the 'challenge'). We then verify that you truly did turn as instructed (the 'response'). In this way we can detect and block attacks using video of you.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
                                 <div class="custom-control custom-checkbox my-1">
                                     <input type="checkbox" class="custom-control-input" name="AutoEnroll" id="AutoEnroll" value="true">
                                     <label class="custom-control-label" for="AutoEnroll">Enable auto-enrollment</label>
-                                    <a tabindex="0" role="button" data-toggle="popover" data-trigger="hover focus" title="Auto-Enrollment" data-html="false"
-                                       data-content="Enables automatic enrollment with the verification operation: in case a verification succeeds, the uploaded samples are automatically enrolled. This ensures that the biometric template of the person is automatically adapted and always 'up-to-date''.">
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Auto-Enrollment"
+                                       data-bs-content="Enables automatic enrollment with the verification operation: in case a verification succeeds, the uploaded samples are automatically enrolled. This ensures that the biometric template of the person is automatically adapted and always 'up-to-date''.">
                                         <i class="fa fa-question-circle-o text-info"></i>
                                     </a>
                                 </div>
@@ -150,6 +150,10 @@
                 $(this).prop('checked', true);
             }
         });
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
     });
 </script>
 }

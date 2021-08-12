@@ -136,7 +136,7 @@ namespace uuisample.Controllers
                 var claims = JObject.Parse(claimstring);
                 var taskFlags = claims["task"].Value<int>();
 
-                Uri host = new Uri((string)claims["aud"]);
+                Uri host = new((string)claims["aud"]);
 
                 // ask the token service for the result
                 JObject json = null;
@@ -144,7 +144,7 @@ namespace uuisample.Controllers
                 {
                     string credentials = Convert.ToBase64String(Encoding.GetEncoding("iso-8859-1").GetBytes($"{_appID}:{_appSecret}"));
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentials);
-                    UriBuilder uri = new UriBuilder("https", host.Host, 443, "extension/result", $"?access_token={access_token}");
+                    UriBuilder uri = new("https", host.Host, 443, "extension/result", $"?access_token={access_token}");
                     var response = await httpClient.GetAsync(uri.Uri);
                     if (!response.IsSuccessStatusCode)
                     {
