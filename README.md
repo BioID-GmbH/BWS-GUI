@@ -30,6 +30,7 @@ You can also try this BWS user interface via our [Playgound website][playground]
 BioID offers a strong liveness detection API which is independent from special sensors like 3D cameras. It simply analyzes two selfies to determine whether or not these were taken from a real person or a fake. Most notably, it reliably blocks photo and video replay attacks as well as 3D masks by combining motion and texture based analysis with artificial intelligence (DCNNs).
 
 [<img src="https://img.youtube.com/vi/14ivZ9shtmY/maxresdefault.jpg" width="50%">](https://youtu.be/14ivZ9shtmY)
+[<img src="https://img.youtube.com/vi/fBbVBIub50I/maxresdefault.jpg" width="50%">](https://youtu.be/fBbVBIub50I)
 
 Have a look here for more information on face liveness detection: [Liveness detection | Anti-spoofing | Face - BioID][liveness]
 
