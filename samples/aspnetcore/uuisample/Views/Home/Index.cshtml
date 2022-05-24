@@ -31,7 +31,12 @@
                                 <input type="text" class="form-control" name="apiurl" value="https://bws.bioid.com/extension/" placeholder="e.g. https://bws.bioid.com/extension/" />
                             </div>
                             <div class="form-group">
-                                <div><strong>Biometric Class ID</strong></div>
+                                <div><strong>Biometric Class ID</strong>
+                                    <a tabindex="0" role="button" data-bs-toggle="popover" data-bs-trigger="hover focus" title="Biometric Class ID (BCID)"
+                                       data-bs-content="Please take a look at BwsPortal -> Configuration. There is the necessary data for your BCID. Storage.Partition.Number e.g. bioid.42.1">
+                                        <i class="fa fa-question-circle-o text-info"></i>
+                                </a>
+                                </div>
                                 <input type="text" class="form-control" name="bcid" placeholder="e.g. bioid.42.12345" />
                             </div>
                             <div class="form-group">
