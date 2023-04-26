@@ -37,7 +37,7 @@ Have a look here for more information on face liveness detection: [Liveness dete
 You can find some more information about our [face recognition][bioid] technology.
 
 [bioid]: https://www.bioid.com "BioID GmbH Homepage"
-[docs]: https://developer.bioid.com/bwsreference "BWS documentation"
+[docs]: https://developer.bioid.com/classicbws/bwsreference "BWS documentation"
 [playground]: https://playground.bioid.com "BioID Playground"
 [bioidaccountregister]: https://account.bioid.com/Account/Register "Register a BioID account" 
 [trial]: https://bwsportal.bioid.com/register "Register for a trial instance"
