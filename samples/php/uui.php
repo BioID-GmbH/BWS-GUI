@@ -233,7 +233,7 @@ if(!empty($claims->task)) {
 	$maxtries = $claims->task & 0x0F;
 }
 ?> 
-    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/jquery-3.7.1.min.js"></script>
     <script src="./js/getUserMedia.min.js"></script>
     <script src="./js/bws.capture.js"></script>
     <script src="./js/three.min.js"></script>
